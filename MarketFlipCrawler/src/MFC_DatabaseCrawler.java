@@ -1,6 +1,9 @@
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class MFC_DatabaseCrawler implements Runnable {
-
+public class MFC_DatabaseCrawler implements Runnable{
+//	private Executors executor = new ExecutorService();
+	
 	@Override
 	public void run() {
 		/*
@@ -8,7 +11,12 @@ public class MFC_DatabaseCrawler implements Runnable {
 		 *  results from the Market Flip database
 		 */
 		while (true) {
-			System.out.println("db");
+			try {
+				System.out.println("db");
+				Thread.sleep(1000);
+			} catch (InterruptedException e){
+				
+			}
 		}
 		
 	}
