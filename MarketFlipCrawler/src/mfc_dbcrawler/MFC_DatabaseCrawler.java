@@ -1,8 +1,18 @@
+package mfc_dbcrawler;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import marketflip.MF_Product;
+
 public class MFC_DatabaseCrawler implements Runnable{
-//	private Executors executor = new ExecutorService();
+	private BlockingQueue<MF_Product> bqMFProduct;
+	private ExecutorService executor;
+	
+	// Construct with Executor and pipeline
+	public MFC_DatabaseCrawler(BlockingQueue<MF_Product> bqMFProduct) {
+		this.bqMFProduct = bqMFProduct;
+	}
 	
 	@Override
 	public void run() {
