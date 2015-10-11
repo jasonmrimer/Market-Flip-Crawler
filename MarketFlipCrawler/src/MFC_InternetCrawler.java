@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -8,7 +9,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public class MFC_InternetCrawler implements Runnable {
-	private ArrayList<MFC_WebsiteFinder> callablesArray = new ArrayList<MFC_WebsiteFinder>();	//contain all of the callables passed to the executor
+//	private ArrayList<MFC_WebsiteFinder> callablesArray = new ArrayList<MFC_WebsiteFinder>();	//contain all of the callables passed to the executor
+	private ArrayList<Future<String>> futuresArray = new ArrayList<Future<String>>();	//contain all of the callables passed to the executor
 	private ExecutorService executor;
 	private static int MFC_MAX_THREAD_COUNT = 3;	//limit thread number based on what our system architecture can handle
 	
@@ -24,46 +26,47 @@ public class MFC_InternetCrawler implements Runnable {
 	@Override
 	public void run() {
 		// Create a Callable to be used for Futures; help found at: http://www.journaldev.com/1090/java-callable-future-example
-        //submit Callable tasks to be executed by thread pool
-        while (true) {
-        	for (int callableCount = callablesArray.size(); callableCount <= MFC_MAX_THREAD_COUNT; callableCount++){
-        		callablesArray.add(new MFC_WebsiteFinder());
+        // Submit Callable tasks to be executed by thread pool
+        while (true) {		// Constantly seek websites for processing
+        	// Fills ArrayList to ensure the program always runs max threads allowable
+        	for (int futuresCount = futuresArray.size(); futuresCount < MFC_MAX_THREAD_COUNT; futuresCount++){
+        		Future<String> future = executor.submit(new MFC_WebsiteFinder());
+        		futuresArray.add(future);
         	}
-        	try {
-				String completedCallable = executor.invokeAny(callablesArray);
-				System.out.println(completedCallable);
-				callablesArray.remove(completedCallable);
-			} catch (InterruptedException e) {
-			} catch (ExecutionException e) {
-			}
+        	for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--){
+    			try {
+        			if (futuresArray.get(futureIndex).isDone()) {
+        				System.out.println(futuresArray.get(futureIndex).get());
+        				futuresArray.remove(futureIndex);
+        				System.out.println("removed, size: " + futuresArray.size());
+        			}
+        		}
+				catch (InterruptedException e) {
+    				e.printStackTrace();
+				} 
+    			catch (ExecutionException e) {
+    				e.printStackTrace();
+    			}
+    			catch (ConcurrentModificationException e){
+    				e.printStackTrace();
+    			}
+    		}
+//    		for (Future<String> future : futuresArray){
+//    			try {
+//        			if (future.isDone()) {
+//        				System.out.println(future.get());
+//        				if (futuresArray.remove(future)) System.out.println("removed, size: " + futuresArray.size());
+//        			}
+//        		}
+//				catch (InterruptedException e) {
+//				} 
+//    			catch (ExecutionException e) {
+//				}
+//    			catch (ConcurrentModificationException e){
+//    				e.printStackTrace();
+//    			}
+//    		}
         	
         }
-//		Future<String> future = executor.submit(new MFC_WebsiteFinder());
-//		// Constantly seek websites for processing
-//		while (true) {
-//			for (int count = 0; count < MFC_MAX_THREAD_COUNT; count++){
-//				FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
-//					public String call() {
-//						return findWebsite();
-//			    }});
-//				executor.execute(future);
-//			}
-//			try {
-//				System.out.println("net");
-//				System.out.println(executor.invokeAll(tasks));
-//				Thread.sleep(500);
-//			} 
-//			catch (InterruptedException e){} 
-//			catch (ExecutionException e) {}
-//		}
-	}
-	/*
-	 * This method will crawl until it finds a new website with products then
-	 * pass that website to an analyzer
-	 */
-	
-	private String findWebsite() {
-//		return "http://website.com/" + count;
-		return "http://website.com/" + (new Random()).nextInt(1000000);
 	}
 }
