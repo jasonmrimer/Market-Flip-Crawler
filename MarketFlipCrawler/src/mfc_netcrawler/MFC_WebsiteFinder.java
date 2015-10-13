@@ -11,7 +11,7 @@ public class MFC_WebsiteFinder implements Callable<String> {
 		Date startDate = new Date();
 		Thread.sleep((new Random()).nextInt(5000));
 		Date endDate = new Date();
-		return "http://website.com/" + startDate + " finished " + endDate;
+		return "http://website.com/" + startDate + " finished " + endDate + " <UPC>{" + (int)((new Random()).nextFloat()*100000000) + "}";
 	}
 
 }
