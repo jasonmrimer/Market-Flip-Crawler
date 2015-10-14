@@ -6,8 +6,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import marketflip.MF_Product;
 import marketflip.MF_SourceCode;
-import mfc_analyzer.MFC_SourceCodeAnalysisManager;
-import mfc_netcrawler.MFC_NetCrawler;
+import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
+import mfc_netcrawler.MFC_NetCrawlerManager;
 import mfc_dbcrawler.MFC_DatabaseCrawlerManager;
 
 public class MFC_Main {
@@ -20,10 +20,10 @@ public class MFC_Main {
 	public static void main(String args[]){
 		// Create pipelines for inter-thread communication
 		BlockingQueue<MF_Product> bqMFProduct = new ArrayBlockingQueue<MF_Product>(MFC_DatabaseCrawlerManager.MFC_MAX_DB_QUEUE_COUNT);
-		BlockingQueue<MF_SourceCode> bqMFSourceCode = new ArrayBlockingQueue<MF_SourceCode>(MFC_SourceCodeAnalysisManager.MFC_MAX_ANALYZER_QUEUE_COUNT);
+		BlockingQueue<MF_SourceCode> bqMFSourceCode = new ArrayBlockingQueue<MF_SourceCode>(MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT);
 		// Create threads to run simultaneous sections of the application
-		(new Thread(new MFC_SourceCodeAnalysisManager(bqMFSourceCode, bqMFProduct))).start();	//takes sourcecode and returns product
+		(new Thread(new MFC_SourceCodeAnalyzerManager(bqMFSourceCode, bqMFProduct))).start();	//takes sourcecode and returns product
 		(new Thread(new MFC_DatabaseCrawlerManager(bqMFProduct))).start();						//takes product and updates database
-		(new Thread(new MFC_NetCrawler(bqMFSourceCode))).start();						//delivers sourcecode for analyzing
+		(new Thread(new MFC_NetCrawlerManager(bqMFSourceCode))).start();						//delivers sourcecode for analyzing
 	}
 }

@@ -10,9 +10,9 @@ import java.util.concurrent.Future;
 
 import marketflip.MF_Product;
 import marketflip.MF_SourceCode;
-import mfc_netcrawler.MFC_WebsiteFinder;
+import mfc_netcrawler.MFC_NetCrawler;
 
-public class MFC_SourceCodeAnalysisManager implements Runnable {
+public class MFC_SourceCodeAnalyzerManager implements Runnable {
 	public final static int MFC_MAX_ANALYZER_QUEUE_COUNT = 3;	//limit queue number based on what our system architecture can handle
 	private final int MFC_MAX_THREAD_COUNT = 3;	//limit thread number based on what our system architecture can handle
 	private ArrayList<Future<MF_Product>> futuresArray = new ArrayList<Future<MF_Product>>();	//contain all of the callables passed to the executor
@@ -21,7 +21,7 @@ public class MFC_SourceCodeAnalysisManager implements Runnable {
 	private ExecutorService executor;
 
 	// Construct with open pipelines
-	public MFC_SourceCodeAnalysisManager(BlockingQueue<MF_SourceCode> bqMFSourceCode, BlockingQueue<MF_Product> bqMFProduct) {
+	public MFC_SourceCodeAnalyzerManager(BlockingQueue<MF_SourceCode> bqMFSourceCode, BlockingQueue<MF_Product> bqMFProduct) {
 		this.bqMFSourceCode = bqMFSourceCode; 
 		this.bqMFProduct = bqMFProduct;
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT); 
