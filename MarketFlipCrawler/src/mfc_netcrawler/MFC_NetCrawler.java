@@ -2,6 +2,8 @@ package mfc_netcrawler;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.*;
+import org.jsoup.*;
+
 public class MFC_NetCrawler implements Callable<String> {
 
 	@Override

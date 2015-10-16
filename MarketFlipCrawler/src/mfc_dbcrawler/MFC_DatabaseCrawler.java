@@ -1,7 +1,6 @@
 package mfc_dbcrawler;
 
 import java.util.concurrent.Callable;
-
 import marketflip.MF_Product;
 
 public class MFC_DatabaseCrawler implements Callable<Boolean> {
