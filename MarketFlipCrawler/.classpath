@@ -5,6 +5,7 @@
 	<classpathentry kind="lib" path="/Users/Atlas/Downloads/jsoup-1.8.3-javadoc.jar"/>
 	<classpathentry kind="lib" path="/Users/Atlas/Downloads/jsoup-1.8.3.jar"/>
 	<classpathentry kind="lib" path="/Users/Atlas/Downloads/jsoup-1.8.3-sources.jar"/>
-	<classpathentry kind="con" path="com.google.gdt.eclipse.managedapis.MANAGED_API_CONTAINER/sqladmin-v1beta4r12lv1.18.0-rc"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/Atlas/Documents/Eclipse/mysql-connector-java-5.0.8/mysql-connector-java-5.0.8-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

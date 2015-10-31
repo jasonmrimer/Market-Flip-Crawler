@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+testDatabaseName=WebsiteURLs
+testDatabasePassword=
+testDatabaseUser=root
+testInstanceName=marketflip-crawler\:websites
