@@ -12,7 +12,6 @@ import marketflip.MF_SourceCode;
 import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
 import mfc_netcrawler.MFC_NetCrawlerManager;
 import mfc_dbcrawler.MFC_DatabaseCrawlerManager;
-
 public class MFC_Main {
 	/*
 	 * This main method only serves to start the program then
