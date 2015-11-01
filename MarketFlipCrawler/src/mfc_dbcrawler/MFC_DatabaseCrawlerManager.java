@@ -50,7 +50,7 @@ public class MFC_DatabaseCrawlerManager implements Runnable{
 	    			try {
 	        			if (futuresArray.get(futureIndex).isDone()) {
 	        				futuresArray.remove(futureIndex);
-	        				System.out.println("removed, DBCM array size: " + futuresArray.size());
+	        				// TODO Move to JUnit System.out.println("removed, DBCM array size: " + futuresArray.size());
 	        			}
 	        		} catch (ConcurrentModificationException e) {
 	    				e.printStackTrace();

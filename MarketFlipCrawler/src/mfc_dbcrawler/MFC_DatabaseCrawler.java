@@ -18,7 +18,7 @@ public class MFC_DatabaseCrawler implements Callable<Boolean> {
 	}
 
 	private void insert(MF_Product product2) {
-		System.out.println("Inserted to DB: " + product.toString());		
+		// TODO Move to JUnit System.out.println("Inserted to DB: " + product.toString());		
 	}
 
 }

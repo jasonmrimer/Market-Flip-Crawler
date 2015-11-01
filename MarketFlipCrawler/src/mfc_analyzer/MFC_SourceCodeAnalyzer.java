@@ -8,16 +8,18 @@ package mfc_analyzer;
 
 import java.util.concurrent.Callable;
 
+import org.jsoup.nodes.Document;
+
 import marketflip.MF_Product;
 import marketflip.MF_SourceCode;
 
 public class MFC_SourceCodeAnalyzer implements Callable<MF_Product> {
-	private MF_SourceCode sourceCode;	// Future object with more advanced possibilites of XML, JSON, etc.
+	private Document sourceCode;	// Future object with more advanced possibilites of XML, JSON, etc.
 	private String strSourceCode;		// Simplifed to String for testing
 	
-	public MFC_SourceCodeAnalyzer(MF_SourceCode sourceCode) {
-		this.sourceCode = sourceCode;
-		this.strSourceCode = sourceCode.toString();
+	public MFC_SourceCodeAnalyzer(Document document) {
+		this.sourceCode = document;
+		this.strSourceCode = document.toString();
 	}
 	@Override
 	public MF_Product call() throws Exception {

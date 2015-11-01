@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.jsoup.nodes.Document;
+
 import marketflip.MF_Product;
 import marketflip.MF_SourceCode;
 import mfc_netcrawler.MFC_NetCrawler;
@@ -16,12 +18,12 @@ public class MFC_SourceCodeAnalyzerManager implements Runnable {
 	public final static int MFC_MAX_ANALYZER_QUEUE_COUNT = 3;	//limit queue number based on what our system architecture can handle
 	private final int MFC_MAX_THREAD_COUNT = 3;	//limit thread number based on what our system architecture can handle
 	private ArrayList<Future<MF_Product>> futuresArray = new ArrayList<Future<MF_Product>>();	//contain all of the callables passed to the executor
-	private BlockingQueue<MF_SourceCode> bqMFSourceCode;	//open communication TO SourceCodeAnalyzer
+	private BlockingQueue<Document> bqMFSourceCode;	//open communication TO SourceCodeAnalyzer
 	private BlockingQueue<MF_Product> bqMFProduct;			//open communication TO DBCrawler
 	private ExecutorService executor;
 
 	// Construct with open pipelines
-	public MFC_SourceCodeAnalyzerManager(BlockingQueue<MF_SourceCode> bqMFSourceCode, BlockingQueue<MF_Product> bqMFProduct) {
+	public MFC_SourceCodeAnalyzerManager(BlockingQueue<Document> bqMFSourceCode, BlockingQueue<MF_Product> bqMFProduct) {
 		this.bqMFSourceCode = bqMFSourceCode; 
 		this.bqMFProduct = bqMFProduct;
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT); 
@@ -49,10 +51,10 @@ public class MFC_SourceCodeAnalyzerManager implements Runnable {
 	        	// Iterate through Futures to remove any completed Callables in order to refill the thread pool and keep it full
 	        	for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--){
 	    			try {
-	        			if (futuresArray.get(futureIndex).isDone()) {
+	        			if (futuresArray.get(futureIndex).isDone() && bqMFProduct.size() < MFC_MAX_ANALYZER_QUEUE_COUNT) {
 	        				bqMFProduct.add(futuresArray.get(futureIndex).get());
 	        				futuresArray.remove(futureIndex);
-	        				System.out.println("removed, SCA array size: " + futuresArray.size());
+	        				// TODO Move to JUnit System.out.println("removed, SCA array size: " + futuresArray.size());
 	        			}
 	        		} catch (InterruptedException e) {
 	    				e.printStackTrace();
