@@ -1,4 +1,5 @@
 package mfc_netcrawler;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Random;
@@ -10,6 +11,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import javax.net.ssl.SSLHandshakeException;
+
+import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 
 import marketflip.MF_SourceCode;
@@ -68,7 +72,8 @@ public class MFC_NetCrawlerManager implements Runnable {
         	for (int futuresCount = futuresArray.size(); futuresCount < MFC_MAX_THREAD_COUNT; futuresCount++){
                 // Submit Callable tasks to be executed by thread pool and return Future to be analyzed for completion.
         		if (!URLs.isEmpty()){
-	        		Future<MFC_NetCrawler> future = executor.submit(new MFC_NetCrawler(URLs.remove(0)));
+	        		Future<MFC_NetCrawler> future;
+					future = executor.submit(new MFC_NetCrawler(URLs.remove(0)));
 	        		futuresArray.add(future);	//add future to list for tracking
         		}
         		else break;

@@ -6,7 +6,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.jsoup.nodes.Document;
-
 import marketflip.MF_Product;
 import marketflip.MF_SourceCode;
 import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
