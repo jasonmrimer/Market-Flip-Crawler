@@ -15,7 +15,7 @@ import marketflip.MF_SourceCode;
 import mfc_netcrawler.MFC_NetCrawler;
 
 public class MFC_SourceCodeAnalyzerManager implements Runnable {
-	public final static int MFC_MAX_ANALYZER_QUEUE_COUNT = 3;	//limit queue number based on what our system architecture can handle
+	public final static int MFC_MAX_ANALYZER_QUEUE_COUNT = 10;	//limit queue number based on what our system architecture can handle
 	private final int MFC_MAX_THREAD_COUNT = 3;	//limit thread number based on what our system architecture can handle
 	private ArrayList<Future<MF_Product>> futuresArray = new ArrayList<Future<MF_Product>>();	//contain all of the callables passed to the executor
 	private BlockingQueue<Document> bqMFSourceCode;	//open communication TO SourceCodeAnalyzer

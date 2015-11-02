@@ -29,7 +29,7 @@ import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
  * as much data as possible while other classes handle more time/resource-intensive processes.
  */
 public class MFC_NetCrawlerManager implements Runnable {
-	private final int 							MFC_MAX_THREAD_COUNT	=	3;									// limit thread number based on what our system architecture can handle
+	private final int 							MFC_MAX_THREAD_COUNT	=	10;									// limit thread number based on what our system architecture can handle
 	private final int 							MFC_MAX_SITE_VISITS		=	100;								// limit sites to prevent infinite crawl
 	private ArrayList<Future<MFC_NetCrawler>>	futuresArray			=	new ArrayList<Future<MFC_NetCrawler>>();	// contain all of the callables passed to the executor
 	private BlockingQueue<Document>				bqMFSourceCode;													// open communication TO SourceCodeAnalyzer
@@ -54,6 +54,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 	 */
 	@Override
 	public void run() {
+		Long startTime = System.currentTimeMillis();
 		// TODO Start the first crawler pointed at a specific website
 //		Future<MFC_NetCrawler> startFuture = executor.submit(netCrawler);
 //		try {
@@ -83,9 +84,11 @@ public class MFC_NetCrawlerManager implements Runnable {
     			try {
         			if (futuresArray.get(futureIndex).isDone() && bqMFSourceCode.size() < MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT) {
         				// TODO move to JUnit Test: System.out.println(futuresArray.get(futureIndex).get());
-        				bqMFSourceCode.add(futuresArray.get(futureIndex).get().getSiteDoc());
-        				URLs.addAll(futuresArray.get(futureIndex).get().getURLs());
-        				System.out.println(futuresArray.get(futureIndex).get().getSiteDoc().baseUri());
+        				if (futuresArray.get(futureIndex).get().getSiteDoc() != null) {
+        					bqMFSourceCode.add(futuresArray.get(futureIndex).get().getSiteDoc());
+            				System.out.println(futuresArray.get(futureIndex).get().getSiteDoc().baseUri());
+            				URLs.addAll(futuresArray.get(futureIndex).get().getURLs());
+        				}
         				futuresArray.remove(futureIndex);
         				sitesVisited++;
         				// TODO move to JUnit Test: System.out.println("removed, NC size: " + futuresArray.size());
@@ -99,6 +102,9 @@ public class MFC_NetCrawlerManager implements Runnable {
     			}
     		}
         }
+		executor.shutdown();
+		Long elapsedTime = startTime - System.currentTimeMillis();
+		System.out.println("elapsed time: " + elapsedTime + " ms");
 	}
 
 	public MFC_NetCrawler getNetCrawler() {

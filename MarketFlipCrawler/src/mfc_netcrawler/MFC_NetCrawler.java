@@ -37,15 +37,15 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 		
 		try {
 			if (startURL.startsWith("http://")) {
-				Connection.Response response = Jsoup.connect(startURL).ignoreContentType(true).execute();
-				if (response.contentType().startsWith("text/") || response.contentType().startsWith("application/xml") || 
-						response.contentType().startsWith("application/xhtml+xml")){
+				String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
+				if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
+						contentType.startsWith("application/xhtml+xml")){
 					siteDoc = Jsoup.connect(startURL).get();
 					Elements links = siteDoc.select("a[href]");
 					for (Element link: links) {
-						Connection.Response URLresponse = Jsoup.connect(link.attr("abs:href")).ignoreContentType(true).execute();
-						if ((URLresponse.contentType().startsWith("text/") || URLresponse.contentType().startsWith("application/xml") || 
-								URLresponse.contentType().startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
+						String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
+						if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
+								linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
 							// TODO only accept hhtp:// for now to speed crawling due to errors
 							URLs.add(link.attr("abs:href"));
 						}

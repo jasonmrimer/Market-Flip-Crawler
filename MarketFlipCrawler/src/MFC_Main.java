@@ -2,6 +2,7 @@
  * Main will eventually run the threads of the site crawler and the database crawler.
  * Jason M. Rimer, 20151009
  */
+import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -26,5 +27,5 @@ public class MFC_Main {
 		(new Thread(new MFC_SourceCodeAnalyzerManager(bqMFSourceCode, bqMFProduct))).start();	//takes sourcecode and returns product
 		(new Thread(new MFC_DatabaseCrawlerManager(bqMFProduct))).start();						//takes product and updates database
 		(new Thread(new MFC_NetCrawlerManager(bqMFSourceCode))).start();						//delivers sourcecode for analyzing
-	}
+ 	}
 }
