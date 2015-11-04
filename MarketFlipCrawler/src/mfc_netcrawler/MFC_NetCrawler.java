@@ -2,6 +2,8 @@ package mfc_netcrawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -29,29 +31,54 @@ import org.jsoup.select.Elements;
  *         URL exclusion set to make sure you don't anger any webmasters ;)
  */
 public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
-	private final int	MAX_SITE_DEPTH	=	10;
-	private Document	siteDoc; // Use to pass to SourceCode Analyzer through pipeline
-	private Collection	URLs			=	new ArrayList<String>();
+	private final int			MAX_SITE_DEPTH	=	10;
+	private Document			siteDoc; // Use to pass to SourceCode Analyzer through pipeline
+	private Collection<String>	URLs			=	new ArrayList<String>();
+	private MFC_TempDB			database;
+	private String				startURL;
+	private ResultSet			resultSet;
+	
+//	public MFC_NetCrawler(String startURL) { 			
+//		this.startURL = startURL;
+//	
+//	}
 
-	public MFC_NetCrawler(String startURL) { 			
-		
+	public MFC_NetCrawler(MFC_TempDB database, String startURL) {
+		// TODO Auto-generated constructor stub
+		this.database = database;
+		this.startURL = startURL;
+		this.resultSet = database.getURLResultSet(startURL);
+		runJSoup();
+	}
+
+	public void runJSoup(){
 		try {
-			if (startURL.startsWith("http://")) {
-				String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
-				if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
-						contentType.startsWith("application/xhtml+xml")){
-					siteDoc = Jsoup.connect(startURL).get();
-					Elements links = siteDoc.select("a[href]");
-					for (Element link: links) {
-						String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
-						if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
-								linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
-							// TODO only accept hhtp:// for now to speed crawling due to errors
-							URLs.add(link.attr("abs:href"));
+			// Test whether in database
+			if (resultSet.next()){
+			}
+			else {
+				if (startURL.startsWith("http://")) {
+					String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
+					if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
+							contentType.startsWith("application/xhtml+xml")){
+						siteDoc = Jsoup.connect(startURL).get();
+						Elements links = siteDoc.select("a[href]");
+						for (Element link: links) {
+							if (database.getURLResultSet(link.attr("abs:href")).next()){
+							}
+							else{
+								database.insertURLToWebsiteTable(link.attr("abs:href"));
+								String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
+								if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
+										linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
+									// TODO only accept hhtp:// for now to speed crawling due to errors
+									URLs.add(link.attr("abs:href"));
+								}
+							}
 						}
 					}
+					else siteDoc = null;
 				}
-				else siteDoc = null;
 			}
 		} catch (SSLHandshakeException | MalformedURLException | HttpStatusException e) {
 			// TODO handle exception SSL the issue by getting the proper certifications for HTTPS websites: https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
@@ -63,9 +90,12 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 			// TODO Auto-generated catch block
 			System.err.println("MFC_NetCrawler IO exception to JSoup connection:");
 //			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.err.println("MFC_NetCrawler SQL exception to JSoup connection:");
+//			e.printStackTrace();
 		}
 	}
-
 	/**
 	 * Upon completion, this method will return a future to the its executor. In
 	 * particular, the source code of the website as a JSoup Document.
@@ -78,7 +108,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 
 	/**
 	 * Getters: used to pass the source doc to the sourcecodanalyzer and the
-	 * URLs to iterate through
+	 * URLs to iterate through in the manager
 	 * 
 	 * @return
 	 */
@@ -89,4 +119,13 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	public Collection getURLs() {
 		return URLs;
 	}
+
+	public MFC_TempDB getDatabase() {
+		return database;
+	}
+
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
 }

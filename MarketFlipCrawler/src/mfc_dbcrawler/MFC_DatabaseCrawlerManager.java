@@ -11,7 +11,7 @@ import marketflip.MF_Product;
 import mfc_analyzer.MFC_SourceCodeAnalyzer;
 
 public class MFC_DatabaseCrawlerManager implements Runnable{
-	public final static int MFC_MAX_DB_QUEUE_COUNT = 10;	//limit queue number based on what our system architecture can handle
+	public final static int MFC_MAX_DB_QUEUE_COUNT = 3;	//limit queue number based on what our system architecture can handle
 	private final int MFC_MAX_THREAD_COUNT = 10;	//limit thread number based on what our system architecture can handle
 	private ArrayList<Future> futuresArray = new ArrayList<Future>();	//contain all of the callables passed to the executor
 	private BlockingQueue<MF_Product> bqMFProduct;

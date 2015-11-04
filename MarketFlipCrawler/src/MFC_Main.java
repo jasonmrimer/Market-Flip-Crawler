@@ -2,6 +2,7 @@
  * Main will eventually run the threads of the site crawler and the database crawler.
  * Jason M. Rimer, 20151009
  */
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -19,7 +20,7 @@ public class MFC_Main {
 	 * threads and diverge into a database crawler and internet crawler
 	 */
 
-	public static void main(String args[]){
+	public static void main(String args[]) throws SQLException{
 		// Create pipelines for inter-thread communication
 		BlockingQueue<MF_Product> bqMFProduct = new ArrayBlockingQueue<MF_Product>(MFC_DatabaseCrawlerManager.MFC_MAX_DB_QUEUE_COUNT);
 		BlockingQueue<Document> bqMFSourceCode = new ArrayBlockingQueue<Document>(MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT);
