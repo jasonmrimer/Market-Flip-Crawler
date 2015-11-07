@@ -20,6 +20,7 @@ import com.google.appengine.api.utils.SystemProperty;
 public class MFC_TempDB {
 	public Connection con = null;
 	private String websitesTableName = "Websites";
+	private String columnNameURL = "URL";
 	private String hostURL = "jdbc:mysql://173.194.234.96:3306/WebsiteURLs?user=root";
 	private String username = "Jason";
 	private String password = "marketflip";
@@ -32,8 +33,8 @@ public class MFC_TempDB {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection(hostURL, username, password);
-			clearAllTables();
-			createWebsitesTable();
+//			clearAllTables();
+//			createWebsitesTable();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
@@ -45,7 +46,7 @@ public class MFC_TempDB {
 	 * base URLs that accept crawlers such as JSoup
 	 * some code from: http://stackoverflow.com/questions/2942788/check-if-table-exists
 	 */
-	private void clearAllTables() throws SQLException{
+	public void clearAllTables() throws SQLException{
 		DatabaseMetaData meta = con.getMetaData();
 		ResultSet rs = meta.getTables(null, null, "Websites", new String[] {"TABLE"});
 		if (rs.next()){
@@ -54,6 +55,8 @@ public class MFC_TempDB {
 			try {
 				sta = con.createStatement();
 				sta.execute(sql);
+				sta.close();
+				rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -62,17 +65,33 @@ public class MFC_TempDB {
 	/*
 	 * Create the table to hold websites
 	 */
-	private void createWebsitesTable(){
+	public void createWebsitesTable(){
 		String sql =
 				"CREATE TABLE " + websitesTableName +
-				"(URL varchar(255));";
+				"(" + columnNameURL + " varchar(255));";
 		Statement sta;
 		try {
 			sta = con.createStatement();
 			sta.execute(sql);
+			sta.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public ResultSet getResultSetFromPreparedStatement(String preparedStatement) {
+		PreparedStatement prepState;
+		ResultSet resultSet = null;
+		try {
+			prepState = con.prepareStatement(preparedStatement);
+			resultSet = prepState.executeQuery();
+//			System.out.println("executed prep state: " + resultSet.getString(1));
+			prepState.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return resultSet;
 	}
 	
 	public ResultSet getResultSet(String sql) {
@@ -81,6 +100,7 @@ public class MFC_TempDB {
 		try {
 			sta = con.createStatement();
 			resultSet = sta.executeQuery(sql);
+//			sta.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -121,9 +141,16 @@ public class MFC_TempDB {
 	 */
 	public ResultSet getURLResultSet(String startURL) {
 		ResultSet resultSet;
-		resultSet = getResultSet(
-					"SELECT ('" + startURL + "')" + 
-					"FROM " + websitesTableName + ";");
+		resultSet = getResultSetFromPreparedStatement(
+					"SELECT * " + 
+					"FROM " + websitesTableName + " " +
+					"WHERE " + columnNameURL + " = '" + startURL + "';");
+		try {
+			resultSet.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return resultSet;
 	}
 	/**
@@ -139,4 +166,35 @@ public class MFC_TempDB {
 							" (URL) VALUES ('" + URL + "');");
 		return didInsert;
 	}
+	
+	// TODO create a boolean to test whether in database and return tuple if necessary
+	// delete other methods that leave resultSets open after use because returning an open result set
+	// causes massive issue
+	
+	public boolean isRecorded(String checkURL) {
+		boolean isRecorded = false;
+		ResultSet resultSet;
+		PreparedStatement preparedStatement;
+		String sql = 
+				"SELECT * " + 
+				"FROM " + websitesTableName + " " +
+				"WHERE " + columnNameURL + " = '" + checkURL + "';";
+		try {
+			preparedStatement = con.prepareStatement(sql);
+			resultSet = preparedStatement.executeQuery();
+//			System.out.println("executed prep state: " + resultSet.getString(1));
+			if (resultSet.next()) {
+				isRecorded = true;
+			}
+			preparedStatement.close();
+			resultSet.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return isRecorded;
+	}
+	
+	
 }

@@ -27,8 +27,9 @@ public class MFC_SourceCodeAnalyzer implements Callable<MF_Product> {
 	}
 	private MF_Product analyzeCode() {
 		if (strSourceCode.indexOf("<UPC>") > 0) {
-			return new MF_Product("UPC: " + strSourceCode.substring(strSourceCode.indexOf("<UPC>{") + 6,
-					strSourceCode.indexOf("}", strSourceCode.indexOf("<UPC>"))));	// Assumes nomenclature: <UPC>{12345678}
+			return new MF_Product("UPC by URL: " + this.sourceCode.attr("abs:href"));
+//			return new MF_Product("UPC: " + strSourceCode.substring(strSourceCode.indexOf("<UPC>{") + 6,
+//					strSourceCode.indexOf("}", strSourceCode.indexOf("<UPC>"))));	// Assumes nomenclature: <UPC>{12345678}
 		}
 		else return new MF_Product("not a product");
 	}

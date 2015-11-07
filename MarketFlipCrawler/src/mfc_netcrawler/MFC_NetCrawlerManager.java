@@ -39,13 +39,13 @@ public class MFC_NetCrawlerManager implements Runnable {
 	private String								startURL				=	"http://jsoup.org";
 	private ArrayList<String>					URLs					=	new ArrayList<String>();
 	private MFC_TempDB							database;
-	private int 								sitesVisited;
+	private int 								sitesVisited			=	0;
 	// Construct with open pipeline TO SourceCodeAnalyzer
 	public MFC_NetCrawlerManager(BlockingQueue<Document> bqMFSourceCode) throws SQLException {
 		this.bqMFSourceCode = bqMFSourceCode;
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT);
 		database = new MFC_TempDB();
-		netCrawler = new MFC_NetCrawler(database, startURL); // create first netCrawler object
+		URLs.add(startURL);
 		// TODO move to JUnit Test
 	}
 	
@@ -58,7 +58,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 	public void run() {
 		Long startTime = System.currentTimeMillis();
 		// Start the first crawler pointed at a specific website
-		startFirstCrawler();
+//		startFirstCrawler();
 
 		// Create a Callable to be used for Futures; help found at: http://www.journaldev.com/1090/java-callable-future-example
 		while (sitesVisited < MFC_MAX_SITE_VISITS) {		// Constantly seek websites for processing
@@ -76,37 +76,35 @@ public class MFC_NetCrawlerManager implements Runnable {
 		System.out.println("elapsed time: " + elapsedTime + " ms");
 	}
 	
-	private void startFirstCrawler() {
-//		netCrawler.runJSoup(); // initiate all of the jsoup methods for the URL
-		URLs.addAll(netCrawler.getURLs()); // add first few URLs to crawling list
-		if (netCrawler.getSiteDoc() != null) {
-			bqMFSourceCode.add(netCrawler.getSiteDoc());
-		}
-		sitesVisited = 1;		
-	}
-	
 	private void fillFuturesArray() {
 		for (int futuresCount = futuresArray.size(); futuresCount < MFC_MAX_THREAD_COUNT; futuresCount++){
             // Submit Callable tasks to be executed by thread pool and return Future to be analyzed for completion.
     		if (!URLs.isEmpty()){ // check that a URL is ready to execute
-        		Future<MFC_NetCrawler> future;
-        		MFC_NetCrawler netCrawlerSubmission = new MFC_NetCrawler(database, URLs.remove(0));
-				future = executor.submit(netCrawlerSubmission);
-        		futuresArray.add(future);	//add future to list for tracking
+        		String futureURL = URLs.remove(0);	// remove the first URL (FIFO) to submit as NetCrawler Future
+    			System.out.println("submitting future: " + futureURL);	// TODO Move to JUnit
+        		MFC_NetCrawler futureNetCrawler = new MFC_NetCrawler(database, futureURL);	// create the NetCrawler to submit as Future
+    			Future<MFC_NetCrawler> future;	// create a Future with a returned NetCrawler
+        		future = executor.submit(futureNetCrawler);	// submit Future/start thread
+        		futuresArray.add(future);	// add future to list for tracking
     		}
     		else break;
     	}		
 	}
 
 	private void manageCallables() {
-		for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--){
+//		for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--){	// LIFO - switch to FIFO
+		for (int futureIndex = 0; futureIndex < futuresArray.size(); futureIndex++) {	// FIFO
 			try {
     			if (futuresArray.get(futureIndex).isDone() && bqMFSourceCode.size() < MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT) {
-    				// TODO move to JUnit Test: System.out.println(futuresArray.get(futureIndex).get());
-    				if (futuresArray.get(futureIndex).get().getSiteDoc() != null) {
-    					bqMFSourceCode.add(futuresArray.get(futureIndex).get().getSiteDoc());
-        				System.out.println(futuresArray.get(futureIndex).get().getSiteDoc().baseUri());
-        				URLs.addAll(futuresArray.get(futureIndex).get().getURLs());
+    				// TODO move to JUnit Test: 
+					MFC_NetCrawler completedNetCrawler = futuresArray.get(futureIndex).get();	// retrieve completed NetCrawler from Future
+    				System.out.println("Completed NetCrawler: " + completedNetCrawler.getStartURL()); // TODO move to JUnit
+    				if (completedNetCrawler.getSiteDoc() != null) {
+    					bqMFSourceCode.add(completedNetCrawler.getSiteDoc());
+    					System.out.println("Site visited: " + completedNetCrawler.getSiteDoc().attr("abs:href"));	// TODO returns blank
+//        				System.out.println(futuresArray.get(futureIndex).get().getSiteDoc().baseUri());
+        				URLs.addAll(completedNetCrawler.getURLs());
+        				// TODO check URLs returned
     				}
     				futuresArray.remove(futureIndex);
     				sitesVisited++;
@@ -150,3 +148,13 @@ public class MFC_NetCrawlerManager implements Runnable {
 	}
 	
 }
+//private void startFirstCrawler() {
+//netCrawler = new MFC_NetCrawler(database, startURL); // create first netCrawler object
+//
+////netCrawler.runJSoup(); // initiate all of the jsoup methods for the URL
+//URLs.addAll(netCrawler.getURLs()); // add first few URLs to crawling list
+//if (netCrawler.getSiteDoc() != null) {
+//	bqMFSourceCode.add(netCrawler.getSiteDoc());
+//}
+//sitesVisited = 1;		
+//}

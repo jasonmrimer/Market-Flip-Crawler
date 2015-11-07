@@ -37,6 +37,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	private MFC_TempDB			database;
 	private String				startURL;
 	private ResultSet			resultSet;
+	private int callCount = 0;
 	
 //	public MFC_NetCrawler(String startURL) { 			
 //		this.startURL = startURL;
@@ -47,53 +48,62 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 		// TODO Auto-generated constructor stub
 		this.database = database;
 		this.startURL = startURL;
-		this.resultSet = database.getURLResultSet(startURL);
-		runJSoup();
 	}
 
 	public void runJSoup(){
 		try {
+			boolean isURLRecorded = database.isRecorded(startURL);
+			resultSet = database.getURLResultSet(startURL);
 			// Test whether in database
-			if (resultSet.next()){
+			if (database.isRecorded(startURL)){	// only check the resultset with first() *do not move cursor
+				System.out.println("from netcrawler: already in db");
 			}
 			else {
 				if (startURL.startsWith("http://")) {
 					String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
 					if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
 							contentType.startsWith("application/xhtml+xml")){
+						System.out.println("netcrawler 64, type: " + contentType);
 						siteDoc = Jsoup.connect(startURL).get();
 						Elements links = siteDoc.select("a[href]");
-						for (Element link: links) {
-							if (database.getURLResultSet(link.attr("abs:href")).next()){
+						for (Element link : links) {
+//							ResultSet linkResultSet = database.getURLResultSet(link.attr("abs:href")); 
+							if (database.isRecorded(link.attr("abs:href"))) {	// move cursor to row and use resultSet
+//								String url = linkResultSet.getString(1);	// TODO get more generic argument to assure dynamic code
+								System.out.println("netcrawler 69, new link, " + link.attr("abs:href") + ", already in db ");
 							}
-							else{
-								database.insertURLToWebsiteTable(link.attr("abs:href"));
+							else {
+								System.out.println("not in db: " + link.attr("abs:href"));
+//								database.insertURLToWebsiteTable(link.attr("abs:href"));	// putting it in the database here is bad - only insert WHEN completing a crawl
 								String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
 								if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
 										linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
 									// TODO only accept hhtp:// for now to speed crawling due to errors
 									URLs.add(link.attr("abs:href"));
+									System.out.println("added to array: " + link.attr("abs:href"));
 								}
 							}
 						}
 					}
 					else siteDoc = null;
+					database.insertURLToWebsiteTable(startURL);	// insert to db after crawl complete
 				}
+				resultSet.close();
 			}
 		} catch (SSLHandshakeException | MalformedURLException | HttpStatusException e) {
 			// TODO handle exception SSL the issue by getting the proper certifications for HTTPS websites: https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
 			// TODO handle exception Malformed by filtering missing URL parts: https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
 			// TODO handle httpstatusexception seemingly from 404 not founds
 			System.err.println("MFC_NetCrawler non-IO exception to JSoup connection:");
-//			e.printStackTrace();
+			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.err.println("MFC_NetCrawler IO exception to JSoup connection:");
-//			e.printStackTrace();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			System.err.println("MFC_NetCrawler SQL exception to JSoup connection:");
-//			e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 	/**
@@ -103,6 +113,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	@Override
 	public MFC_NetCrawler call() throws Exception {
 		// TODO Auto-generated method stub - these obviously needs to be much more robust^_^
+		runJSoup();
 		return this;
 	}
 
@@ -128,4 +139,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 		return resultSet;
 	}
 
+	public String getStartURL() {
+		return startURL;
+	}
 }
