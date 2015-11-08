@@ -40,11 +40,6 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	private ResultSet resultSet;
 	private int callCount = 0;
 
-	// public MFC_NetCrawler(String startURL) {
-	// this.startURL = startURL;
-	//
-	// }
-
 	public MFC_NetCrawler(MFC_TempDB database, String startURL) {
 		// TODO Auto-generated constructor stub
 		this.database = database;
@@ -53,31 +48,36 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 
 	public void runJSoup(){
 		try {
-			boolean isURLRecorded = database.isRecorded(startURL);
-			resultSet = database.getURLResultSet(startURL);
-			// Test whether in database
-			if (!database.isRecorded(startURL) && startURL.startsWith("http://")){	// if not recorded & a proper website, crawl it.  former: System.out.println("from netcrawler: already in db");	// TODO Junit
-				String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
+			/*
+			 * If not recorded & a proper website, crawl it.  
+			 * 
+			 * former: System.out.println("from netcrawler: already in db");	
+			 * // TODO Junit to ensure it properly finds already recorded URLs
+			 */
+			if (!database.isRecorded(startURL) && startURL.startsWith("http://")){	
+				/*
+				 * TODO The tester limits the type of websites that the code attempts to pull from 
+				 * in order to limit errors. We need to expand this to a more elaborate testing
+				 * scheme because this is more like a "duct tape" solution for our temporary testing.
+				 */
+				// TODO ignoreContentType it part of the bad solution but gets what we need to examine:
+				String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());	
 				if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
 						contentType.startsWith("application/xhtml+xml")){
-//						System.out.println("netcrawler 64, type: " + contentType);	// TODO Junit
-					siteDoc = Jsoup.connect(startURL).get();
-					Elements links = siteDoc.select("a[href]");
-					for (Element link : links) {
-//							ResultSet linkResultSet = database.getURLResultSet(link.attr("abs:href")); 
+					/*
+					 * This iteration is the heart of "crawling" as it takes all the links
+					 * out of a website's Document and queues each link for a visit by a 
+					 * Future in the NetCrawlerManager
+					 */
+					siteDoc = Jsoup.connect(startURL).get();	// fetch the site document that contains HTML-tagged data from JSoup 
+					Elements links = siteDoc.select("a[href]");	// fetch the array of links
+					for (Element link : links) {				// iterate each link inside the link array from the siteDoc
 						if (!database.isRecorded(link.attr("abs:href"))) {	// move cursor to row and use resultSet
-////								String url = linkResultSet.getString(1);	// TODO get more generic argument to assure dynamic code
-////								System.out.println("netcrawler 69, new link, " + link.attr("abs:href") + ", already in db ");	// TODO Junit
-//						}
-//						else {
-//								System.out.println("not in db: " + link.attr("abs:href"));	// TODO Junit
-//								database.insertURLToWebsiteTable(link.attr("abs:href"));	// putting it in the database here is bad - only insert WHEN completing a crawl
 							String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
 							if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
 									linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
 								// TODO only accept http:// for now to speed crawling due to errors
 								URLs.add(link.attr("abs:href"));
-//									System.out.println("added to array: " + link.attr("abs:href"));	// TODO Junit
 							}
 						}
 					}
@@ -85,38 +85,20 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 				else siteDoc = null;
 				database.insertURLToWebsiteTable(startURL);	// insert to db after crawl complete
 			}
-			resultSet.close();
-		}catch(SSLHandshakeException|MalformedURLException|
-
-	HttpStatusException e)
-
-	{
-		// TODO handle exception SSL the issue by getting the proper
-		// certifications for HTTPS websites:
-		// https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
-		// TODO handle exception Malformed by filtering missing URL parts:
-		// https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
-		// TODO handle httpstatusexception seemingly from 404 not founds
-		System.err.println("MFC_NetCrawler non-IO exception to JSoup connection:");
-		e.printStackTrace();
-	} catch(
-
-	IOException e)
-
-	{
-		// TODO Auto-generated catch block
-		System.err.println("MFC_NetCrawler IO exception to JSoup connection:");
-		e.printStackTrace();
-	} catch(
-
-	SQLException e)
-
-	{
-		// TODO Auto-generated catch block
-		System.err.println("MFC_NetCrawler SQL exception to JSoup connection:");
-		e.printStackTrace();
-	}
-
+		} catch (SSLHandshakeException | MalformedURLException | HttpStatusException e) {
+			// TODO handle exception SSL the issue by getting the proper
+			// certifications for HTTPS websites:
+			// https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
+			// TODO handle exception Malformed by filtering missing URL parts:
+			// https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
+			// TODO handle httpstatusexception seemingly from 404 not founds
+			System.err.println("MFC_NetCrawler non-IO exception to JSoup connection:");
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.err.println("MFC_NetCrawler IO exception to JSoup connection:");
+			e.printStackTrace();
+		}
 	}
 
 	/**

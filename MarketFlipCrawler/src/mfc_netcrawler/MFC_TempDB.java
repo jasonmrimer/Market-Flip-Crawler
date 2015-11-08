@@ -33,8 +33,8 @@ public class MFC_TempDB {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection(hostURL, username, password);
-//			clearAllTables();
-//			createWebsitesTable();
+			clearAllTables();
+			createWebsitesTable();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
