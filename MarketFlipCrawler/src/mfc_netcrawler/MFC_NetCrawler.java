@@ -2,6 +2,9 @@ package mfc_netcrawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,6 +19,8 @@ import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * MFC_NetCrawler is the producer class for the NetCrawlerManager. NetCrawler
@@ -37,15 +42,28 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	private Collection<String> URLs = new ArrayList<String>();
 	private MFC_TempDB database;
 	private String startURL;
+	private String startURLAfterHash;
 	private ResultSet resultSet;
 	private int callCount = 0;
 
 	public MFC_NetCrawler(MFC_TempDB database, String startURL) {
 		// TODO Auto-generated constructor stub
 		this.database = database;
+		/*
+		 * Uses the SHA-256 hashing algorithm to return a unique string for each URL.
+		 * The database stores each hashed string as the identifier for the URL to ensure
+		 * it accounts for all URLs regardless of length 
+		 */
 		this.startURL = startURL;
+		this.startURLAfterHash = DigestUtils.sha256Hex(startURL);
 	}
 
+	/**
+	 * This method uses several JSoup tools to extract the site document,
+	 * links array, and content type to facilitate analysis and crawling.
+	 * It also checks the database to see if the program already examined the 
+	 * website to be processed.
+	 */
 	public void runJSoup(){
 		try {
 			/*
@@ -54,14 +72,18 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 			 * former: System.out.println("from netcrawler: already in db");	
 			 * // TODO Junit to ensure it properly finds already recorded URLs
 			 */
-			if (!database.isRecorded(startURL) && startURL.startsWith("http://")){	
+			// trial: better to check before crawling or before inserting into array? the manager keeps
+			// duplicating efforts
+			if (startURL.startsWith("http://")){
+//			if (!database.isRecorded(startURLAfterHash) && startURL.startsWith("http://")){	
 				/*
 				 * TODO The tester limits the type of websites that the code attempts to pull from 
 				 * in order to limit errors. We need to expand this to a more elaborate testing
 				 * scheme because this is more like a "duct tape" solution for our temporary testing.
 				 */
 				// TODO ignoreContentType it part of the bad solution but gets what we need to examine:
-				String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());	
+				Connection jsoupCon = Jsoup.connect(startURL).timeout(10000);
+				String contentType = new String(jsoupCon.ignoreContentType(true).execute().contentType());	
 				if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
 						contentType.startsWith("application/xhtml+xml")){
 					/*
@@ -69,23 +91,27 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 					 * out of a website's Document and queues each link for a visit by a 
 					 * Future in the NetCrawlerManager
 					 */
-					siteDoc = Jsoup.connect(startURL).get();	// fetch the site document that contains HTML-tagged data from JSoup 
+					siteDoc = Jsoup.connect(startURL).timeout(10000).get();	// fetch the site document that contains HTML-tagged data from JSoup 
 					Elements links = siteDoc.select("a[href]");	// fetch the array of links
 					for (Element link : links) {				// iterate each link inside the link array from the siteDoc
-						if (!database.isRecorded(link.attr("abs:href"))) {	// move cursor to row and use resultSet
-							String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
-							if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
-									linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
-								// TODO only accept http:// for now to speed crawling due to errors
-								URLs.add(link.attr("abs:href"));
-							}
-						}
+						/*
+						 * Use a separate method to handle each link in order to catch errors specific to each link
+						 * rather than the overlapping URLs throughout the runJSoup method
+						 */
+						// TRIAL: removing this test from the links and forcing the test on every URL; that will cause
+						// the manager to create a thread for every link and [hopefully] improve runtime.
+//						testLink(link);
+						URLs.add(link.attr("abs:href"));
 					}
 				}
 				else siteDoc = null;
-				database.insertURLToWebsiteTable(startURL);	// insert to db after crawl complete
+				database.insertURLToWebsiteTable(startURLAfterHash);	// insert to db after crawl complete
 			}
-		} catch (SSLHandshakeException | MalformedURLException | HttpStatusException e) {
+		} catch (SSLHandshakeException e) {
+			System.err.println("SSLHandshakeException for: " + startURL);
+			database.insertURLToWebsiteTable(startURLAfterHash);	// insert to avoid re-crawl and error
+		}
+		catch (MalformedURLException | HttpStatusException e) {
 			// TODO handle exception SSL the issue by getting the proper
 			// certifications for HTTPS websites:
 			// https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
@@ -94,10 +120,41 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 			// TODO handle httpstatusexception seemingly from 404 not founds
 			System.err.println("MFC_NetCrawler non-IO exception to JSoup connection:");
 			e.printStackTrace();
-		} catch (IOException e) {
+		}  catch (SocketTimeoutException e) {
+			System.err.println("SocketTimeoutException for: " + startURL);
+			database.insertURLToWebsiteTable(startURLAfterHash);	// insert to avoid re-crawl and error
+		}
+		catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.err.println("MFC_NetCrawler IO exception to JSoup connection:");
-			e.printStackTrace();
+			System.err.println("MFC_NetCrawler IO exception to JSoup connection for " + startURL);
+			database.insertURLToWebsiteTable(startURLAfterHash);	// insert to avoid re-crawl and error
+//			e.printStackTrace();
+		}
+	}
+
+	private void testLink(Element link) {
+		// TODO Auto-generated method stub
+		String linkURL			= link.attr("abs:href");
+		String linkURLHashed	= DigestUtils.sha256Hex(linkURL);
+		String linkContentType;
+		// TRIAL: removing this test from the links and forcing the test on every URL; that will cause
+		// the manager to create a thread for every link and [hopefully] improve runtime.
+		if (!database.isRecorded(linkURLHashed)) {
+			try {
+				if (linkURL.startsWith("http://")){
+					linkContentType = Jsoup.connect(linkURL).timeout(10000).ignoreContentType(true).execute().contentType();
+					if (linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
+							linkContentType.startsWith("application/xhtml+xml")){
+						// TODO only accept http:// for now to speed crawling due to errors
+						URLs.add(linkURL);
+					} else database.insertURLToWebsiteTable(linkURLHashed); // if it is unsearchable, add to the database so the manage never crawls it
+				} else database.insertURLToWebsiteTable(linkURLHashed);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.err.println("IOException at testLink for: " + linkURL);
+				database.insertURLToWebsiteTable(linkURLHashed);
+	//			e.printStackTrace();
+			}
 		}
 	}
 
@@ -138,3 +195,12 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 		return startURL;
 	}
 }
+// TRIAL
+//if (!database.isRecorded(link.attr("abs:href"))) {	// move cursor to row and use resultSet *I already examine this upfront and the duplication of effort slows; it is worth only having once
+//	String linkContentType = new String(Jsoup.connect(link.attr("abs:href")).ignoreContentType(true).execute().contentType());
+//	if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
+//			linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
+//		// TODO only accept http:// for now to speed crawling due to errors
+//		URLs.add(link.attr("abs:href"));
+//	} else database.insertURLToWebsiteTable(DigestUtils.sha256Hex(link.attr("abs:href"))); // if it is unsearchable, add to the database so the manage never crawls it
+//}

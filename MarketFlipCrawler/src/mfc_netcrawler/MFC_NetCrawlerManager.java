@@ -17,6 +17,8 @@ import javax.net.ssl.SSLHandshakeException;
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 
+import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+
 import marketflip.MF_SourceCode;
 import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
 
@@ -30,7 +32,7 @@ import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
  * as much data as possible while other classes handle more time/resource-intensive processes.
  */
 public class MFC_NetCrawlerManager implements Runnable {
-	private final int 							MFC_MAX_THREAD_COUNT	=	3;									// limit thread number based on what our system architecture can handle
+	private final int 							MFC_MAX_THREAD_COUNT	=	100;									// limit thread number based on what our system architecture can handle
 	private final int 							MFC_MAX_SITE_VISITS		=	100;								// limit sites to prevent infinite crawl
 	private ArrayList<Future<MFC_NetCrawler>>	futuresArray			=	new ArrayList<Future<MFC_NetCrawler>>();	// contain all of the callables passed to the executor
 	private BlockingQueue<Document>				bqMFSourceCode;													// open communication TO SourceCodeAnalyzer
@@ -87,7 +89,11 @@ public class MFC_NetCrawlerManager implements Runnable {
 //    			Future<MFC_NetCrawler> future;	// create a Future with a returned NetCrawler
 //        		future = executor.submit(futureNetCrawler);	// submit Future/start thread
 //        		futuresArray.add(future);	// add future to list for tracking
-        		futuresArray.add(executor.submit(new MFC_NetCrawler(database, URLs.remove(0))));
+        		// TRIAL: receiving error with duplicate threads likely due to concurrent db updates
+    			// and thread creations. moving isRecorded test to Manager despite time lag 
+    			if (!database.isRecorded(DigestUtils.sha256Hex(URLs.get(0)))) {
+        			futuresArray.add(executor.submit(new MFC_NetCrawler(database, URLs.remove(0))));
+        		} else URLs.remove(0);
     		}
     		else break;
     	}		
@@ -102,11 +108,11 @@ public class MFC_NetCrawlerManager implements Runnable {
 //    				System.out.println("Completed NetCrawler: " + completedNetCrawler.getStartURL()); // TODO move to JUnit
     				if (completedNetCrawler.getSiteDoc() != null) {
     					bqMFSourceCode.add(completedNetCrawler.getSiteDoc());
-    					System.out.println("Site visited: " + completedNetCrawler.getStartURL());	// TODO returns blank
         				URLs.addAll(completedNetCrawler.getURLs());
         				// TODO check URLs returned
     				}
     				futuresArray.remove(futureIndex);
+					System.out.println("Site visited: " + completedNetCrawler.getStartURL());	// TODO returns blank
     				sitesVisited++;
     				// TODO move to JUnit Test: System.out.println("removed, NC size: " + futuresArray.size());
     			}
