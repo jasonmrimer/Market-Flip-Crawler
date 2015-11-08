@@ -92,7 +92,6 @@ public class MFC_NetCrawlerManager implements Runnable {
 	}
 
 	private void manageCallables() {
-//		for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--){	// LIFO - switch to FIFO
 		for (int futureIndex = 0; futureIndex < futuresArray.size(); futureIndex++) {	// FIFO
 			try {
     			if (futuresArray.get(futureIndex).isDone() && bqMFSourceCode.size() < MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT) {
@@ -101,8 +100,7 @@ public class MFC_NetCrawlerManager implements Runnable {
     				System.out.println("Completed NetCrawler: " + completedNetCrawler.getStartURL()); // TODO move to JUnit
     				if (completedNetCrawler.getSiteDoc() != null) {
     					bqMFSourceCode.add(completedNetCrawler.getSiteDoc());
-    					System.out.println("Site visited: " + completedNetCrawler.getSiteDoc().attr("abs:href"));	// TODO returns blank
-//        				System.out.println(futuresArray.get(futureIndex).get().getSiteDoc().baseUri());
+//    					System.out.println("Site visited: " + completedNetCrawler.getSiteDoc().attr("abs:href"));	// TODO returns blank
         				URLs.addAll(completedNetCrawler.getURLs());
         				// TODO check URLs returned
     				}

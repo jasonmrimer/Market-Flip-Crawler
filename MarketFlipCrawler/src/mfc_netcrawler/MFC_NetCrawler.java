@@ -31,18 +31,19 @@ import org.jsoup.select.Elements;
  *         URL exclusion set to make sure you don't anger any webmasters ;)
  */
 public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
-	private final int			MAX_SITE_DEPTH	=	10;
-	private Document			siteDoc; // Use to pass to SourceCode Analyzer through pipeline
-	private Collection<String>	URLs			=	new ArrayList<String>();
-	private MFC_TempDB			database;
-	private String				startURL;
-	private ResultSet			resultSet;
+	private final int MAX_SITE_DEPTH = 10;
+	private Document siteDoc; // Use to pass to SourceCode Analyzer through
+								// pipeline
+	private Collection<String> URLs = new ArrayList<String>();
+	private MFC_TempDB database;
+	private String startURL;
+	private ResultSet resultSet;
 	private int callCount = 0;
-	
-//	public MFC_NetCrawler(String startURL) { 			
-//		this.startURL = startURL;
-//	
-//	}
+
+	// public MFC_NetCrawler(String startURL) {
+	// this.startURL = startURL;
+	//
+	// }
 
 	public MFC_NetCrawler(MFC_TempDB database, String startURL) {
 		// TODO Auto-generated constructor stub
@@ -55,57 +56,69 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 			boolean isURLRecorded = database.isRecorded(startURL);
 			resultSet = database.getURLResultSet(startURL);
 			// Test whether in database
-			if (database.isRecorded(startURL)){	// only check the resultset with first() *do not move cursor
-				System.out.println("from netcrawler: already in db");
-			}
-			else {
-				if (startURL.startsWith("http://")) {
-					String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
-					if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
-							contentType.startsWith("application/xhtml+xml")){
-						System.out.println("netcrawler 64, type: " + contentType);
-						siteDoc = Jsoup.connect(startURL).get();
-						Elements links = siteDoc.select("a[href]");
-						for (Element link : links) {
+			if (!database.isRecorded(startURL) && startURL.startsWith("http://")){	// if not recorded & a proper website, crawl it.  former: System.out.println("from netcrawler: already in db");	// TODO Junit
+				String contentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
+				if (contentType.startsWith("text/") || contentType.startsWith("application/xml") || 
+						contentType.startsWith("application/xhtml+xml")){
+//						System.out.println("netcrawler 64, type: " + contentType);	// TODO Junit
+					siteDoc = Jsoup.connect(startURL).get();
+					Elements links = siteDoc.select("a[href]");
+					for (Element link : links) {
 //							ResultSet linkResultSet = database.getURLResultSet(link.attr("abs:href")); 
-							if (database.isRecorded(link.attr("abs:href"))) {	// move cursor to row and use resultSet
-//								String url = linkResultSet.getString(1);	// TODO get more generic argument to assure dynamic code
-								System.out.println("netcrawler 69, new link, " + link.attr("abs:href") + ", already in db ");
-							}
-							else {
-								System.out.println("not in db: " + link.attr("abs:href"));
+						if (!database.isRecorded(link.attr("abs:href"))) {	// move cursor to row and use resultSet
+////								String url = linkResultSet.getString(1);	// TODO get more generic argument to assure dynamic code
+////								System.out.println("netcrawler 69, new link, " + link.attr("abs:href") + ", already in db ");	// TODO Junit
+//						}
+//						else {
+//								System.out.println("not in db: " + link.attr("abs:href"));	// TODO Junit
 //								database.insertURLToWebsiteTable(link.attr("abs:href"));	// putting it in the database here is bad - only insert WHEN completing a crawl
-								String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
-								if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
-										linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
-									// TODO only accept hhtp:// for now to speed crawling due to errors
-									URLs.add(link.attr("abs:href"));
-									System.out.println("added to array: " + link.attr("abs:href"));
-								}
+							String linkContentType = new String(Jsoup.connect(startURL).ignoreContentType(true).execute().contentType());
+							if ((linkContentType.startsWith("text/") || linkContentType.startsWith("application/xml") || 
+									linkContentType.startsWith("application/xhtml+xml")) && link.attr("abs:href").startsWith("http://")){
+								// TODO only accept http:// for now to speed crawling due to errors
+								URLs.add(link.attr("abs:href"));
+//									System.out.println("added to array: " + link.attr("abs:href"));	// TODO Junit
 							}
 						}
 					}
-					else siteDoc = null;
-					database.insertURLToWebsiteTable(startURL);	// insert to db after crawl complete
 				}
-				resultSet.close();
+				else siteDoc = null;
+				database.insertURLToWebsiteTable(startURL);	// insert to db after crawl complete
 			}
-		} catch (SSLHandshakeException | MalformedURLException | HttpStatusException e) {
-			// TODO handle exception SSL the issue by getting the proper certifications for HTTPS websites: https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
-			// TODO handle exception Malformed by filtering missing URL parts: https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
-			// TODO handle httpstatusexception seemingly from 404 not founds
-			System.err.println("MFC_NetCrawler non-IO exception to JSoup connection:");
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.err.println("MFC_NetCrawler IO exception to JSoup connection:");
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			System.err.println("MFC_NetCrawler SQL exception to JSoup connection:");
-			e.printStackTrace();
-		}
+			resultSet.close();
+		}catch(SSLHandshakeException|MalformedURLException|
+
+	HttpStatusException e)
+
+	{
+		// TODO handle exception SSL the issue by getting the proper
+		// certifications for HTTPS websites:
+		// https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
+		// TODO handle exception Malformed by filtering missing URL parts:
+		// https://confluence.atlassian.com/display/KB/Unable+to+Connect+to+SSL+Services+due+to+PKIX+Path+Building+Failed
+		// TODO handle httpstatusexception seemingly from 404 not founds
+		System.err.println("MFC_NetCrawler non-IO exception to JSoup connection:");
+		e.printStackTrace();
+	} catch(
+
+	IOException e)
+
+	{
+		// TODO Auto-generated catch block
+		System.err.println("MFC_NetCrawler IO exception to JSoup connection:");
+		e.printStackTrace();
+	} catch(
+
+	SQLException e)
+
+	{
+		// TODO Auto-generated catch block
+		System.err.println("MFC_NetCrawler SQL exception to JSoup connection:");
+		e.printStackTrace();
 	}
+
+	}
+
 	/**
 	 * Upon completion, this method will return a future to the its executor. In
 	 * particular, the source code of the website as a JSoup Document.
