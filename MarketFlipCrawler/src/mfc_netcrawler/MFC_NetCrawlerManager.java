@@ -1,25 +1,15 @@
 package mfc_netcrawler;
-import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-
-import javax.net.ssl.SSLHandshakeException;
-
-import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-
-import marketflip.MF_SourceCode;
 import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
 
 /**
@@ -33,12 +23,12 @@ import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
  */
 public class MFC_NetCrawlerManager implements Runnable {
 	private final int 							MFC_MAX_THREAD_COUNT	=	100;									// limit thread number based on what our system architecture can handle
-	private final int 							MFC_MAX_SITE_VISITS		=	100;								// limit sites to prevent infinite crawl
+	private final int 							MFC_MAX_SITE_VISITS		=	1;								// limit sites to prevent infinite crawl
 	private ArrayList<Future<MFC_NetCrawler>>	futuresArray			=	new ArrayList<Future<MFC_NetCrawler>>();	// contain all of the callables passed to the executor
 	private BlockingQueue<Document>				bqMFSourceCode;													// open communication TO SourceCodeAnalyzer
 	private ExecutorService 					executor;
 	private MFC_NetCrawler						netCrawler;
-	private String								startURL				=	"http://jsoup.org";
+	private String								startURL				=	"http://www.walmart.com/ip/New-Super-Mario-Bros.-Wii/11991871";
 	private ArrayList<String>					URLs					=	new ArrayList<String>();
 	private MFC_TempDB							database;
 	private int 								sitesVisited			=	0;

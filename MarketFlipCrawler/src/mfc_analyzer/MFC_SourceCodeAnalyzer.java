@@ -9,29 +9,35 @@ package mfc_analyzer;
 import java.util.concurrent.Callable;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
-import marketflip.MF_Product;
-import marketflip.MF_SourceCode;
+import com.marketflip.shared.products.MF_Product;
 
 public class MFC_SourceCodeAnalyzer implements Callable<MF_Product> {
-	private Document sourceCode;	// Future object with more advanced possibilites of XML, JSON, etc.
-	private String strSourceCode;		// Simplifed to String for testing
+	private Document siteDoc;	// Future object with more advanced possibilites of XML, JSON, etc.
 	
 	public MFC_SourceCodeAnalyzer(Document document) {
-		this.sourceCode = document;
-		this.strSourceCode = document.toString();
+		this.siteDoc = document;
 	}
+	
 	@Override
 	public MF_Product call() throws Exception {
 		return analyzeCode();
 	}
+	
 	private MF_Product analyzeCode() {
-		if (strSourceCode.indexOf("<UPC>") > 0) {
-			return new MF_Product("UPC by URL: " + this.sourceCode.attr("abs:href"));
-//			return new MF_Product("UPC: " + strSourceCode.substring(strSourceCode.indexOf("<UPC>{") + 6,
-//					strSourceCode.indexOf("}", strSourceCode.indexOf("<UPC>"))));	// Assumes nomenclature: <UPC>{12345678}
+		if (hasUPC()){
+			String UPC = siteDoc.select("meta[property=og:upc").attr("content");
+			String title = siteDoc.select("meta[property=og:title").attr("content");
+			String description = siteDoc.select("div.about-item-preview-text").html();	
+			return new MF_Product(title, description, UPC);
 		}
-		else return new MF_Product("not a product");
+		else return null;
 	}
+	private boolean hasUPC() {
+		// TODO Auto-generated method stub
+		return !siteDoc.select("meta[property=og:upc").attr("content").isEmpty();
+	}
+	
 
 }

@@ -8,8 +8,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.jsoup.nodes.Document;
-import marketflip.MF_Product;
-import marketflip.MF_SourceCode;
+
+import com.marketflip.shared.products.MF_Product;
+
 import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
 import mfc_netcrawler.MFC_NetCrawlerManager;
 import mfc_dbcrawler.MFC_DatabaseCrawlerManager;

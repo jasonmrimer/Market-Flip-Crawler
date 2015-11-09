@@ -7,12 +7,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.jsoup.nodes.Document;
-
-import marketflip.MF_Product;
-import marketflip.MF_SourceCode;
-import mfc_netcrawler.MFC_NetCrawler;
+import com.marketflip.shared.products.MF_Product;
 
 public class MFC_SourceCodeAnalyzerManager implements Runnable {
 	public final static int MFC_MAX_ANALYZER_QUEUE_COUNT = 3;	//limit queue number based on what our system architecture can handle
@@ -43,7 +39,8 @@ public class MFC_SourceCodeAnalyzerManager implements Runnable {
 	        	// Continually empty the queue until the executor reaches capacity
         		while (!bqMFSourceCode.isEmpty()){
 	        		if (futuresArray.size() < MFC_MAX_THREAD_COUNT) {	// Check if the executor can begin another thread
-		        		Future<MF_Product> future = executor.submit(new MFC_SourceCodeAnalyzer(bqMFSourceCode.remove()));	// begin thread & remove from queue
+//	        			System.out.println("SCA adding :" + bqMFSourceCode.peek());
+	        			Future<MF_Product> future = executor.submit(new MFC_SourceCodeAnalyzer(bqMFSourceCode.remove()));	// begin thread & remove from queue
 		        		futuresArray.add(future);	//add future to list for tracking
 	        		}
 	        		else break;
@@ -52,8 +49,10 @@ public class MFC_SourceCodeAnalyzerManager implements Runnable {
 	        	for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--){
 	    			try {
 	        			if (futuresArray.get(futureIndex).isDone() && bqMFProduct.size() < MFC_MAX_ANALYZER_QUEUE_COUNT) {
-	        				bqMFProduct.add(futuresArray.get(futureIndex).get());
+	        				MF_Product tempProduct = futuresArray.get(futureIndex).get();
+	        				if (tempProduct != null) bqMFProduct.add(futuresArray.get(futureIndex).get());
 	        				futuresArray.remove(futureIndex);
+
 	        				// TODO Move to JUnit System.out.println("removed, SCA array size: " + futuresArray.size());
 	        			}
 	        		} catch (InterruptedException e) {

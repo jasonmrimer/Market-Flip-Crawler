@@ -36,7 +36,7 @@ import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUti
  *         URL exclusion set to make sure you don't anger any webmasters ;)
  */
 public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
-	private final int MAX_SITE_DEPTH = 10;
+	private final int MAX_SITE_DEPTH = 1;
 	private Document siteDoc; // Use to pass to SourceCode Analyzer through
 								// pipeline
 	private Collection<String> URLs = new ArrayList<String>();
@@ -44,7 +44,6 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	private String startURL;
 	private String startURLAfterHash;
 	private ResultSet resultSet;
-	private int callCount = 0;
 
 	public MFC_NetCrawler(MFC_TempDB database, String startURL) {
 		// TODO Auto-generated constructor stub
@@ -56,6 +55,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 		 */
 		this.startURL = startURL;
 		this.startURLAfterHash = DigestUtils.sha256Hex(startURL);
+		this.siteDoc = null;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 					 * out of a website's Document and queues each link for a visit by a 
 					 * Future in the NetCrawlerManager
 					 */
-					siteDoc = Jsoup.connect(startURL).timeout(10000).get();	// fetch the site document that contains HTML-tagged data from JSoup 
+					this.siteDoc = Jsoup.connect(startURL).timeout(10000).get();	// fetch the site document that contains HTML-tagged data from JSoup 
 					Elements links = siteDoc.select("a[href]");	// fetch the array of links
 					for (Element link : links) {				// iterate each link inside the link array from the siteDoc
 						/*

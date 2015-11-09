@@ -7,7 +7,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import marketflip.MF_Product;
+import com.marketflip.shared.products.MF_Product;
+
 import mfc_analyzer.MFC_SourceCodeAnalyzer;
 
 public class MFC_DatabaseCrawlerManager implements Runnable{
