@@ -46,11 +46,16 @@ public class MFC_SourceCodeAnalyzerManager implements Runnable {
 	        		else break;
 	        	}
 	        	// Iterate through Futures to remove any completed Callables in order to refill the thread pool and keep it full
-	        	for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--){
+        		for (int futureIndex = 0; futureIndex < futuresArray.size(); futureIndex++) {	// FIFO
 	    			try {
+	    				System.out.println("checking futures");
 	        			if (futuresArray.get(futureIndex).isDone() && bqMFProduct.size() < MFC_MAX_ANALYZER_QUEUE_COUNT) {
 	        				MF_Product tempProduct = futuresArray.get(futureIndex).get();
-	        				if (tempProduct != null) bqMFProduct.add(futuresArray.get(futureIndex).get());
+	        				System.out.println(tempProduct.getDescription());
+	        				if (tempProduct != null) {
+	        					System.out.println("Adding to DBM from SCM: " + tempProduct.getUPC());
+	        					bqMFProduct.add(futuresArray.get(futureIndex).get());
+	        				}
 	        				futuresArray.remove(futureIndex);
 
 	        				// TODO Move to JUnit System.out.println("removed, SCA array size: " + futuresArray.size());

@@ -29,8 +29,9 @@ public class MFC_SourceCodeAnalyzer implements Callable<MF_Product> {
 		if (hasUPC()){
 			String UPC = siteDoc.select("meta[property=og:upc").attr("content");
 			String title = siteDoc.select("meta[property=og:title").attr("content");
-			String description = siteDoc.select("div.about-item-preview-text").html();	
-			return new MF_Product(title, description, UPC);
+			String description = siteDoc.select("div.about-item-preview-text").html();
+			System.out.println("about to return MF_Product");
+			return new MF_Product(siteDoc.attr("abs:href"), title, description, UPC);
 		}
 		else return null;
 	}

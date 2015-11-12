@@ -97,6 +97,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 					MFC_NetCrawler completedNetCrawler = futuresArray.get(futureIndex).get();	// retrieve completed NetCrawler from Future
 //    				System.out.println("Completed NetCrawler: " + completedNetCrawler.getStartURL()); // TODO move to JUnit
     				if (completedNetCrawler.getSiteDoc() != null) {
+    					System.out.println("Adding to SCM from NCM: " + completedNetCrawler.getStartURL());
     					bqMFSourceCode.add(completedNetCrawler.getSiteDoc());
         				URLs.addAll(completedNetCrawler.getURLs());
         				// TODO check URLs returned
