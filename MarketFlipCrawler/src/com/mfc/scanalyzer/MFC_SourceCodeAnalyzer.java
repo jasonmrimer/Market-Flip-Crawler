@@ -1,4 +1,4 @@
-package mfc_analyzer;
+package com.mfc.scanalyzer;
 /*
  * SourceCodeAnalyzer runs as a Callable in order to be trackable as a Future
  * in the threads managed by SourceCodeAnalysisManager. The object methods parse

@@ -10,17 +10,15 @@ import java.util.concurrent.BlockingQueue;
 import org.jsoup.nodes.Document;
 
 import com.marketflip.shared.products.MF_Product;
-
-import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
-import mfc_netcrawler.MFC_NetCrawlerManager;
-import mfc_dbcrawler.MFC_DatabaseCrawlerManager;
+import com.mfc.dbcrawler.MFC_DatabaseCrawlerManager;
+import com.mfc.netcrawler.MFC_NetCrawlerManager;
+import com.mfc.scanalyzer.MFC_SourceCodeAnalyzerManager;
+/**
+ * This main method only serves to start the program then
+ * branch into subclasses & methods with more freedom to operate
+ * threads and diverge into a database crawler and internet crawler
+ */
 public class MFC_Main {
-	/*
-	 * This main method only serves to start the program then
-	 * branch into subclasses & methods with more freedom to operate
-	 * threads and diverge into a database crawler and internet crawler
-	 */
-
 	public static void main(String args[]) throws SQLException{
 		// Create pipelines for inter-thread communication
 		BlockingQueue<MF_Product> bqMFProduct = new ArrayBlockingQueue<MF_Product>(MFC_DatabaseCrawlerManager.MFC_MAX_DB_QUEUE_COUNT);

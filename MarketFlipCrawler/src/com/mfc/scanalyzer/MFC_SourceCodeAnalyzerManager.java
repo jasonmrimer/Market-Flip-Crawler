@@ -1,4 +1,4 @@
-package mfc_analyzer;
+package com.mfc.scanalyzer;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;

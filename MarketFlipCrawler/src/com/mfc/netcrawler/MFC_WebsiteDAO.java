@@ -1,4 +1,4 @@
-package mfc_netcrawler;
+package com.mfc.netcrawler;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,7 +17,7 @@ import com.google.appengine.api.utils.SystemProperty;
  * mvn archetype:generate -Dappengine-version=1.9.28 -Dapplication-id=your-app-id -Dfilter=com.google.appengine.archetypes:
 
  */
-public class MFC_TempDB {
+public class MFC_WebsiteDAO {
 	public Connection con = null;
 	private String websitesTableName = "Websites";
 	private String columnNameURL = "URL";
@@ -29,7 +29,7 @@ public class MFC_TempDB {
 	 * The no args constructor creates the connection to the database
 	 * hardcoded into the class.  
 	 */
-	public MFC_TempDB() {
+	public MFC_WebsiteDAO() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection(hostURL, username, password);

@@ -1,4 +1,4 @@
-package mfc_dbcrawler;
+package com.mfc.dbcrawler;
 
 import java.sql.SQLException;
 import java.util.concurrent.Callable;

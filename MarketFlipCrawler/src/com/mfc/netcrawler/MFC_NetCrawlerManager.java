@@ -1,4 +1,4 @@
-package mfc_netcrawler;
+package com.mfc.netcrawler;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -10,7 +10,7 @@ import java.util.concurrent.Future;
 import org.jsoup.nodes.Document;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-import mfc_analyzer.MFC_SourceCodeAnalyzerManager;
+import com.mfc.scanalyzer.MFC_SourceCodeAnalyzerManager;
 
 /**
  * @author Jason Rimer
@@ -30,13 +30,13 @@ public class MFC_NetCrawlerManager implements Runnable {
 	private MFC_NetCrawler						netCrawler;
 	private String								startURL				=	"http://www.walmart.com/ip/New-Super-Mario-Bros.-Wii/11991871";
 	private ArrayList<String>					URLs					=	new ArrayList<String>();
-	private MFC_TempDB							database;
+	private MFC_WebsiteDAO							database;
 	private int 								sitesVisited			=	0;
 	// Construct with open pipeline TO SourceCodeAnalyzer
 	public MFC_NetCrawlerManager(BlockingQueue<Document> bqMFSourceCode) throws SQLException {
 		this.bqMFSourceCode = bqMFSourceCode;
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT);	// create executor with thread limit
-		database = new MFC_TempDB();	// create connection to database for website storage
+		database = new MFC_WebsiteDAO();	// create connection to database for website storage
 		URLs.add(startURL);				// place the first URL in the queue to begin crawling
 	}
 	
@@ -65,8 +65,12 @@ public class MFC_NetCrawlerManager implements Runnable {
         	
         }
 		executor.shutdown();	// close executor to release assets
-		Long elapsedTime = startTime - System.currentTimeMillis();	// get elapsed time for the netcrawler
-		System.out.println("elapsed time: " + elapsedTime + " ms");
+		try {
+			database.con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void fillFuturesArray() {
@@ -141,7 +145,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 		return URLs;
 	}
 
-	public MFC_TempDB getDatabase() {
+	public MFC_WebsiteDAO getDatabase() {
 		return database;
 	}
 	
