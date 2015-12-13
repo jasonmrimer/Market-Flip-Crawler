@@ -10,5 +10,10 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/MarketFlipSharedAssets"/>
+	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10-javadoc.jar"/>
+	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10-sources.jar"/>
+	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10.jar"/>
+	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10-tests.jar"/>
+	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10-test-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

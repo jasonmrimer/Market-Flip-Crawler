@@ -17,13 +17,11 @@ import java.util.concurrent.*;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-import com.google.appengine.repackaged.org.codehaus.jackson.map.RuntimeJsonMappingException;
 
 /**
  * MFC_NetCrawler is the producer class for the NetCrawlerManager. NetCrawler
@@ -146,7 +144,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 				String linkString = link.attr("abs:href"); // ftr, neither this nor absUrl("href") works
 				if (linkString.isEmpty()) { // check if returned "" (i.e., the problem at hand)
 					URLs.add(siteDoc.baseUri() + link.attr("href")); // concatenate baseURI to relative ref
-					link.absUrl("href");
+					System.out.println("added " + siteDoc.baseUri() + link.attr("href"));
 				}
 				else { // for all the properly returned absolute refs
 					URLs.add(link.attr("abs:href"));
@@ -193,7 +191,10 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 			}
 			// This block includes local files that are HTML docs (e.g., for mock objects)
 			else if (startURLBeforeHash.endsWith(".html")) {
-				siteDoc = Jsoup.parse(new File(startURLBeforeHash), "UTF-8", startURLBaseURI);
+				siteDoc = Jsoup.parse(new File(startURLBeforeHash), "UTF-8");
+				if (siteDoc.baseUri().isEmpty()) {
+					siteDoc.setBaseUri(startURLBaseURI);
+				}
 			}
 			else siteDoc = null;
 		}
