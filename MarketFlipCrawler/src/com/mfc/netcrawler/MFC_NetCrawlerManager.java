@@ -28,7 +28,7 @@ import com.mfc.scanalyzer.MFC_SourceCodeAnalyzerManager;
 public class MFC_NetCrawlerManager implements Runnable {
 
 	private final int							MFC_MAX_THREAD_COUNT	= 100;										// limit thread number based on what our system architecture can handle
-	private final int							MFC_MAX_SITE_VISITS		= 10;										// limit sites to prevent infinite crawl
+	private final int							MFC_MAX_SITE_VISITS		= 4;										// limit sites to prevent infinite crawl
 	private ArrayList<Future<MFC_NetCrawler>>	futuresArray			= new ArrayList<Future<MFC_NetCrawler>>();	// contain all of the callables passed to the executor
 	private BlockingQueue<Document>				bqMFSourceCode;														// open communication TO SourceCodeAnalyzer
 	private ExecutorService						executor;
@@ -38,6 +38,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 	private MFC_WebsiteDAO						database;
 	private int									sitesVisited			= 0;
 	private boolean								isMock					= false;
+	private int									futuresCount;														// used to test how many futures the manager creates
 
 	public MFC_NetCrawlerManager() {
 		database = new MFC_WebsiteDAO(); // create connection to database for website storage
@@ -72,6 +73,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 		database = null;
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT); // create executor with thread limit
 		URLs.add(startURL); // place the first URL in the queue to begin crawling
+		futuresCount = 0;
 	}
 
 	/**
@@ -81,18 +83,20 @@ public class MFC_NetCrawlerManager implements Runnable {
 	 */
 	@Override
 	public void run() {
-		Long startTime = System.currentTimeMillis();
 		/*
 		 * The loop will continually create, check, and complete Callables known as Futures.
 		 * The futures will run as a thread in the executor and manage NetCrawler objects.
 		 * The NetCrawler objects will disect website Documents to get code, links, and descriptions
 		 * for the SourceCodeAnalyzer.
 		 * This Manager will send the completed Document to the Analyzer and close the futures.
+		 * It complets when it reaches the max site limit or all futures are complete while the URL
+		 * list is empty (essentially, found a deadend).
 		 * 
 		 * Some initial understanding found from help found at:
 		 * http://www.journaldev.com/1090/java-callable-future-example
 		 */
-		while (sitesVisited < MFC_MAX_SITE_VISITS || URLs.isEmpty()) { // Constantly seek websites for processing
+		while ((sitesVisited < MFC_MAX_SITE_VISITS)
+				|| (!futuresArray.isEmpty() && !URLs.isEmpty())) { // Constantly seek websites for processing
 			// Fills ArrayList to ensure the program always runs max threads allowable
 			fillFuturesArray();
 
@@ -129,6 +133,8 @@ public class MFC_NetCrawlerManager implements Runnable {
 				if (isMock) {
 					// Using the mock object, disregard the database connection for website URLs and run mock NetCrawlers
 					futuresArray.add(executor.submit(new MFC_NetCrawler(URLs.remove(0))));
+					futuresCount++;
+					System.out.println("mock ncmngr futures++: " + futuresCount);
 					break;
 				}
 				// Actual programming block
@@ -203,16 +209,24 @@ public class MFC_NetCrawlerManager implements Runnable {
 		return bqMFSourceCode;
 	}
 
+	public MFC_WebsiteDAO getDatabase() {
+		return database;
+	}
+
 	public ExecutorService getExecutor() {
 		return executor;
 	}
 
-	public ArrayList<String> getURLs() {
-		return URLs;
+	public int getFuturesCount() {
+		return futuresCount;
 	}
 
-	public MFC_WebsiteDAO getDatabase() {
-		return database;
+	public int getSitesVisited() {
+		return sitesVisited;
+	}
+
+	public ArrayList<String> getURLs() {
+		return URLs;
 	}
 
 }

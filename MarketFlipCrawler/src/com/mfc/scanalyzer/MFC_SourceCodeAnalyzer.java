@@ -27,11 +27,15 @@ public class MFC_SourceCodeAnalyzer implements Callable<MF_Product> {
 	
 	private MF_Product analyzeCode() {
 		if (hasUPC()){
+			MF_Product product = new MF_Product();
 			String UPC = siteDoc.select("meta[property=og:upc").attr("content");
 			String title = siteDoc.select("meta[property=og:title").attr("content");
 			String description = siteDoc.select("div.about-item-preview-text").html();
 			System.out.println("about to return MF_Product");
-			return new MF_Product(siteDoc.attr("abs:href"), title, description, UPC);
+			product.setUPC(UPC);
+			product.setName(title);
+			product.setDescription(description);
+			return product;
 		}
 		else return null;
 	}
@@ -40,5 +44,11 @@ public class MFC_SourceCodeAnalyzer implements Callable<MF_Product> {
 		return !siteDoc.select("meta[property=og:upc").attr("content").isEmpty();
 	}
 	
+	@Override
+	public String toString() {
+		String stringRepresentation;
+		stringRepresentation = "MFC_SourceCodeAnalyzer object with document title: " + siteDoc.title();
+		return stringRepresentation;
+	}
 
 }
