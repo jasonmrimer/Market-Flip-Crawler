@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="lib"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="lib" path="/Library/Java/Extensions/mysql-connector-java-5.0.8/mysql-connector-java-5.0.8-bin.jar"/>
-	<classpathentry kind="lib" path="/Library/Java/Extensions/jsoup-1.8.3.jar" sourcepath="/Library/Java/Extensions/jsoup-1.8.3-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/Library/Java/Extensions/jsoup-1.8.3-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/MarketFlipSharedAssets"/>
 	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10-javadoc.jar"/>
@@ -15,5 +11,8 @@
 	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10.jar"/>
 	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10-tests.jar"/>
 	<classpathentry kind="lib" path="/Users/Atlas/Downloads/commons-codec-1.10/commons-codec-1.10-test-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup/jsoup-1.8.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup/jsoup-1.8.3-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup/jsoup-1.8.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
