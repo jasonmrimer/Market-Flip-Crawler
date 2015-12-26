@@ -9,10 +9,10 @@ import java.util.concurrent.BlockingQueue;
 
 import org.jsoup.nodes.Document;
 
+import com.marketflip.crawler.dbcrawler.MFC_DatabaseCrawlerManager;
+import com.marketflip.crawler.netcrawler.MFC_NetCrawlerManager;
+import com.marketflip.crawler.scanalyzer.MFC_SourceCodeAnalyzerManager;
 import com.marketflip.shared.products.MF_Product;
-import com.mfc.dbcrawler.MFC_DatabaseCrawlerManager;
-import com.mfc.netcrawler.MFC_NetCrawlerManager;
-import com.mfc.scanalyzer.MFC_SourceCodeAnalyzerManager;
 /**
  * This main method only serves to start the program then
  * branch into subclasses & methods with more freedom to operate
@@ -25,7 +25,7 @@ public class MFC_Main {
 		BlockingQueue<Document> bqMFSourceCode = new ArrayBlockingQueue<Document>(MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT);
 		// Create threads to run simultaneous sections of the application
 		(new Thread(new MFC_SourceCodeAnalyzerManager(bqMFSourceCode, bqMFProduct))).start();	//takes sourcecode and returns product
-		(new Thread(new MFC_DatabaseCrawlerManager(bqMFProduct))).start();						//takes product and updates database
+		(new Thread(new MFC_DatabaseCrawlerManager(bqMFProduct, "testing"))).start();						//takes product and updates database
 		(new Thread(new MFC_NetCrawlerManager(bqMFSourceCode))).start();						//delivers sourcecode for analyzing
  	}
 }
