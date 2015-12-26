@@ -1,4 +1,4 @@
-package com.mfc.dbcrawler;
+package com.marketflip.crawler.dbcrawler;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.BlockingQueue;
@@ -7,9 +7,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.marketflip.crawler.scanalyzer.MFC_SourceCodeAnalyzer;
 import com.marketflip.shared.data.MF_DatabaseAccessObject;
 import com.marketflip.shared.products.MF_Product;
-import com.mfc.scanalyzer.MFC_SourceCodeAnalyzer;
 
 public class MFC_DatabaseCrawlerManager implements Runnable{
 	public final static int MFC_MAX_DB_QUEUE_COUNT = 3;	//limit queue number based on what our system architecture can handle

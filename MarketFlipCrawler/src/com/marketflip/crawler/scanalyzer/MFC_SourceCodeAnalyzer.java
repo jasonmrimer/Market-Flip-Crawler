@@ -1,4 +1,4 @@
-package com.mfc.scanalyzer;
+package com.marketflip.crawler.scanalyzer;
 /*
  * SourceCodeAnalyzer runs as a Callable in order to be trackable as a Future
  * in the threads managed by SourceCodeAnalysisManager. The object methods parse

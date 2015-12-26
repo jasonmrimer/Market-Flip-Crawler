@@ -1,4 +1,4 @@
-package com.mfc.scanalyzer;
+package com.marketflip.crawler.scanalyzer;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;

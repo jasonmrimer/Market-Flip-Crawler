@@ -9,10 +9,10 @@ import java.util.concurrent.BlockingQueue;
 
 import org.jsoup.nodes.Document;
 
+import com.marketflip.crawler.dbcrawler.MFC_DatabaseCrawlerManager;
+import com.marketflip.crawler.netcrawler.MFC_NetCrawlerManager;
+import com.marketflip.crawler.scanalyzer.MFC_SourceCodeAnalyzerManager;
 import com.marketflip.shared.products.MF_Product;
-import com.mfc.dbcrawler.MFC_DatabaseCrawlerManager;
-import com.mfc.netcrawler.MFC_NetCrawlerManager;
-import com.mfc.scanalyzer.MFC_SourceCodeAnalyzerManager;
 /**
  * This main method only serves to start the program then
  * branch into subclasses & methods with more freedom to operate

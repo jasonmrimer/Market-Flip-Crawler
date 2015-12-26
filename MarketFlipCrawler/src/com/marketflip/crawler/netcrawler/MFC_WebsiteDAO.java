@@ -1,4 +1,4 @@
-package com.mfc.netcrawler;
+package com.marketflip.crawler.netcrawler;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

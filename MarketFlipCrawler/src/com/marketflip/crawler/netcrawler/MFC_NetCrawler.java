@@ -1,4 +1,4 @@
-package com.mfc.netcrawler;
+package com.marketflip.crawler.netcrawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +48,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	public MFC_NetCrawler() {
 		this.URLs = new ArrayList<String>();
 		this.siteDoc = null;
-		this.startURLBaseURI = "";
+//		this.startURLBaseURI = "";
 	}
 
 	/**
@@ -91,6 +91,10 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 	public MFC_NetCrawler(String testFilePath, String testFileBaseURI) {
 		this(testFilePath);
 		this.startURLBaseURI = testFileBaseURI;
+	}
+
+	public MFC_NetCrawler(URL url) {
+		// TODO Auto-generated constructor stub
 	}
 
 	/**

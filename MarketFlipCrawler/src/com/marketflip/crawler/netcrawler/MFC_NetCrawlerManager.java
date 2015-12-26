@@ -1,4 +1,4 @@
-package com.mfc.netcrawler;
+package com.marketflip.crawler.netcrawler;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import org.jsoup.nodes.Document;
 import org.omg.CORBA.PUBLIC_MEMBER;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-import com.mfc.scanalyzer.MFC_SourceCodeAnalyzerManager;
+import com.marketflip.crawler.scanalyzer.MFC_SourceCodeAnalyzerManager;
 
 /**
  * @author Jason Rimer

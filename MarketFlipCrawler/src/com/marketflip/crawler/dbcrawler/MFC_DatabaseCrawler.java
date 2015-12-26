@@ -1,4 +1,4 @@
-package com.mfc.dbcrawler;
+package com.marketflip.crawler.dbcrawler;
 
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
