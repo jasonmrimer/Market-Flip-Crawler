@@ -1,6 +1,7 @@
 package com.marketflip.crawler.dbcrawler;
 
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
 
 import com.marketflip.shared.data.MF_ProductsDAO;
@@ -20,6 +21,7 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 	private MF_ProductsDAO insertDAO;
 	private MF_ProductsDAO deleteDAO;
 	private MF_ProductsDAO getDAO;
+	private HashSet<String> productSet = new HashSet<String> ();
 	private String environment;
 	private String operation;
 	private MF_Product product;
@@ -27,8 +29,9 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 	/**
 	 * Creates a Data platform that manages various calls to the database. 
 	 * @param environment The environment, either testing or production.
+	 * @throws Exception 
 	 */
-	public MFC_DataPlatform (String environment) {
+	public MFC_DataPlatform (String environment) throws Exception {
 		
 		if (!environment.equals("testing") && !environment.equals("production")){
 			System.err.println("ERROR: Invalid environment. Using test environment.");
@@ -39,6 +42,8 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 		this.insertDAO = new MF_ProductsDAO(this.environment);
 		this.deleteDAO = new MF_ProductsDAO(this.environment);
 		this.getDAO = new MF_ProductsDAO(this.environment);
+		
+		productSet = this.getDAO.getUpdatedProductList();
 	}
 
 	@Override
@@ -116,12 +121,18 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 	 * @throws SQLException
 	 */
 	private boolean insert (MF_Product product){
+		
+		if (productSet.contains(product.getUPC())) {
+			System.err.println("ERROR: Product already contained in database.");
+			return false;
+		}
 		try {
 			boolean valid;
 			valid = insertDAO.addProductToCommit(product);
 			if (insertDAO.getCommitList().size() >= MAX_INSERT_OPERATIONS) {
 				insertDAO.commitProductsToDatabase();
 			}
+			productSet.add(product.getUPC());
 			return valid;
 		} catch (Exception e) {
 			return false;
@@ -134,6 +145,11 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 	 * @throws SQLException
 	 */
 	private MF_Product get (MF_Product product) throws SQLException{
+		
+		if (!productSet.contains(product.getUPC())){
+			System.err.println("ERROR: Product not contained in database.");
+			return null;
+		}
 		return getDAO.getProduct(product);
 	}
 	/**
@@ -142,6 +158,10 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 	 * @return boolean If the operation was successful.
 	 */
 	private boolean delete (MF_Product product) {
+		if (!productSet.contains(product)){
+			System.err.println("ERROR: Product not contained in database.");
+			return false;
+		}
 		try {
 			return deleteDAO.delete(product);
 		} catch (Exception e) {

@@ -14,7 +14,7 @@
 	<classpathentry kind="lib" path="lib/commons-codec-1.10/commons-codec-1.10-tests.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.10/commons-codec-1.10.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.0.8/mysql-connector-java-5.0.8-bin.jar"/>
-	<classpathentry kind="lib" path="D:/Workspace/jar/marketflip-sharedassets.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="D:/Workspace/jar/marketflip-sharedassets.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

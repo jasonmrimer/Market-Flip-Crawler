@@ -19,7 +19,7 @@ public class MFC_DatabaseCrawlerManager implements Runnable{
 	private int productCount = 0;
 	private MFC_DataPlatform dataTransfer;
 	// Construct with Executor and pipeline
-	public MFC_DatabaseCrawlerManager(BlockingQueue<MF_Product> bqMFProduct, String environment) {
+	public MFC_DatabaseCrawlerManager(BlockingQueue<MF_Product> bqMFProduct, String environment) throws Exception {
 		this.bqMFProduct = bqMFProduct;
 		this.environment = environment;
 		this.dataTransfer = new MFC_DataPlatform(this.environment);
