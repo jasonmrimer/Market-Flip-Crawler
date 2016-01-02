@@ -40,6 +40,9 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 			this.environment = environment;
 		}
 		this.insertDAO = new MF_ProductsDAO(this.environment);
+		// TODO clear for testing
+		insertDAO.deleteAllTables();
+		insertDAO.addProductsTable();
 		this.deleteDAO = new MF_ProductsDAO(this.environment);
 		this.getDAO = new MF_ProductsDAO(this.environment);
 		
@@ -59,6 +62,7 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 			}
 			
 			if (this.operation.equals("insert")){
+				System.out.println("dataplatform about to insert");
 				return insert(product);
 			} else if (this.operation.equals("get")) {
 				//Eventually we implement a 2 way BQ back to the crawler so that gets can be completed.
