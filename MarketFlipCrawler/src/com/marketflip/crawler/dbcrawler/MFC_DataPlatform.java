@@ -62,7 +62,6 @@ public class MFC_DataPlatform implements Callable<Boolean> {
 			}
 			
 			if (this.operation.equals("insert")){
-				System.out.println("dataplatform about to insert");
 				return insert(product);
 			} else if (this.operation.equals("get")) {
 				//Eventually we implement a 2 way BQ back to the crawler so that gets can be completed.

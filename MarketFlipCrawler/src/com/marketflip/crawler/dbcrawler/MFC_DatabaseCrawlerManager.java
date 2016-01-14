@@ -57,18 +57,18 @@ public class MFC_DatabaseCrawlerManager implements Runnable {
 		for (int futureIndex = futuresArray.size() - 1; futureIndex > -1; futureIndex--) {
 			try {
 				if (futuresArray.get(futureIndex).isDone()) {
-					System.out.println("in futures emptying: future complete");
-
+					System.out.println("INFO: Operation complete.");
 					if (futuresArray.get(futureIndex).get().booleanValue()) {
-						System.out.println("First ever Market Flip collect!");
+						System.out.println("INFO: Product inserted successfully.")
+					} else {
+						System.out.println("ERROR: Operation failed.");
 					}
-					else System.out.println("Failed");
 					futuresArray.remove(futureIndex);
 					productCount++;
-					// TODO Move to JUnit System.out.println("removed, DBCM array size: " + futuresArray.size());
 				}
 			}
 			catch (ConcurrentModificationException | InterruptedException | ExecutionException e) {
+				System.out.println("ERROR: Exception trown while inserting product.");
 				e.printStackTrace();
 			}
 		}

@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="lib"/>
+	<classpathentry kind="src" output="target/classes" path="src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/MarketFlipSharedAssets"/>
-	<classpathentry kind="lib" path="lib/jsoup/jsoup-1.8.3-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/jsoup/jsoup-1.8.3-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jsoup/jsoup-1.8.3.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10/commons-codec-1.10-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10/commons-codec-1.10-sources.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10/commons-codec-1.10-test-sources.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10/commons-codec-1.10-tests.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10/commons-codec-1.10.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.0.8/mysql-connector-java-5.0.8-bin.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/marketflip-sharedassets.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
