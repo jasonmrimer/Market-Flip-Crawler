@@ -59,7 +59,7 @@ public class MFC_DatabaseCrawlerManager implements Runnable {
 				if (futuresArray.get(futureIndex).isDone()) {
 					System.out.println("INFO: Operation complete.");
 					if (futuresArray.get(futureIndex).get().booleanValue()) {
-						System.out.println("INFO: Product inserted successfully.")
+						System.out.println("INFO: Product inserted successfully.");
 					} else {
 						System.out.println("ERROR: Operation failed.");
 					}
