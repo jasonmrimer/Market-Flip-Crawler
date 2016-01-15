@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
 import org.jsoup.nodes.Document;
 import org.omg.CORBA.PUBLIC_MEMBER;
 
-import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import com.marketflip.crawler.scanalyzer.MFC_SourceCodeAnalyzerManager;
 
 /**
