@@ -9,7 +9,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.*;
-import com.google.appengine.api.utils.SystemProperty;
 
 /*
  * Temporary database class used until the MF_Shared version completes. Only used for

@@ -8,7 +8,6 @@ package com.marketflip.crawler.scanalyzer;
 
 import java.util.concurrent.Callable;
 
-import org.apache.tools.ant.types.resources.comparators.Date;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
