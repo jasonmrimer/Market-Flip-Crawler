@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 
 import com.marketflip.shared.data.MF_DatabaseAccessObject;
 import com.marketflip.shared.products.MF_Product;
-
+//
 public class MFC_DatabaseCrawler implements Callable<Boolean> {
 	private MF_DatabaseAccessObject database;
 	private MF_Product product;
