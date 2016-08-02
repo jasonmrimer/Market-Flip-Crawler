@@ -42,6 +42,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 	private int siteLimit;
 
 	public MFC_NetCrawlerManager() {
+		System.out.println("ASFKJASFKHASDF");
 		database = new MFC_WebsiteDAO(); // create connection to database for website storage
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT); // create executor with thread limit
 	}
@@ -132,14 +133,6 @@ public class MFC_NetCrawlerManager implements Runnable {
 				.size(); futuresCount < MFC_MAX_THREAD_COUNT; futuresCount++) {
 			// Submit Callable tasks to be executed by thread pool and return Future to be analyzed for completion.
 			if (!URLs.isEmpty()) { // check that a URL is ready to execute
-				//        		String futureURL = URLs.remove(0);	// remove the first URL (FIFO) to submit as NetCrawler Future
-				//    			System.out.println("submitting future: " + futureURL);	// TODO Move to JUnit
-				//        		MFC_NetCrawler futureNetCrawler = new MFC_NetCrawler(database, futureURL);	// create the NetCrawler to submit as Future
-				//    			Future<MFC_NetCrawler> future;	// create a Future with a returned NetCrawler
-				//        		future = executor.submit(futureNetCrawler);	// submit Future/start thread
-				//        		futuresArray.add(future);	// add future to list for tracking
-				// TRIAL: receiving error with duplicate threads likely due to concurrent db updates
-				// and thread creations. moving isRecorded test to Manager despite time lag 
 				// Mock block for testing without the database
 				System.out.println("inside netmngr 3");
 
@@ -153,12 +146,9 @@ public class MFC_NetCrawlerManager implements Runnable {
 				// Actual programming block
 				else {
 					System.out.println("inside netmngr 4");
-
 					if (!database.isRecorded(DigestUtils.sha256Hex(URLs.get(0)))) {
-						System.out.println("inside netmngr 5");
-
-						futuresArray
-								.add(executor.submit(new MFC_NetCrawler(database, URLs.remove(0))));
+						System.out.println("inside netmngr 5 for " + URLs.get(0));
+						futuresArray.add(executor.submit(new MFC_NetCrawler(database, URLs.remove(0))));
 					}
 					else URLs.remove(0);
 				}
@@ -172,20 +162,16 @@ public class MFC_NetCrawlerManager implements Runnable {
 			try {
 				if (futuresArray.get(futureIndex).isDone() && bqMFSourceCode
 						.size() < MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT) {
-					// TODO move to JUnit Test: 
 					MFC_NetCrawler completedNetCrawler = futuresArray.get(futureIndex).get(); // retrieve completed NetCrawler from Future
-					//    				System.out.println("Completed NetCrawler: " + completedNetCrawler.getStartURL()); // TODO move to JUnit
 					if (completedNetCrawler.getSiteDoc() != null) {
 						System.out.println(
 								"Adding to SCM from NCM: " + completedNetCrawler.getStartURL());
 						bqMFSourceCode.add(completedNetCrawler.getSiteDoc());
 						URLs.addAll(completedNetCrawler.getURLs());
-						// TODO check URLs returned
 					}
 					futuresArray.remove(futureIndex);
-					System.out.println("Site visited: " + completedNetCrawler.getStartURL()); // TODO returns blank
+					System.out.println("Site visited: " + completedNetCrawler.getStartURL());
 					sitesVisited++;
-					// TODO move to JUnit Test: System.out.println("removed, NC size: " + futuresArray.size());
 				}
 			}
 			catch (InterruptedException e) {
