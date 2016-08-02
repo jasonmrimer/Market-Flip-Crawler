@@ -42,7 +42,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 	private int siteLimit;
 
 	public MFC_NetCrawlerManager() {
-		System.out.println("ASFKJASFKHASDF");
+		System.out.println("asssssaaa");
 		database = new MFC_WebsiteDAO(); // create connection to database for website storage
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT); // create executor with thread limit
 	}
