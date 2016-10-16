@@ -116,6 +116,7 @@ public class MFC_NetCrawler implements Callable<MFC_NetCrawler> {
 		// Insert into database to catalog visit
 		if (database != null) {
 			database.insertURLToWebsiteTable(startURLAfterHash);
+			System.out.print("catalogued: " + startURLBeforeHash);
 		}
 	}
 

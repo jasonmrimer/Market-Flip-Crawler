@@ -39,10 +39,9 @@ public class MFC_NetCrawlerManager implements Runnable {
 	private int									sitesVisited			= 0;
 	private boolean								isMock					= false;
 	private int									futuresCount;														// used to test how many futures the manager creates
-	private int siteLimit;
+	private int 								siteLimit;
 
 	public MFC_NetCrawlerManager() {
-		System.out.println("asssssaaa");
 		database = new MFC_WebsiteDAO(); // create connection to database for website storage
 		executor = Executors.newFixedThreadPool(MFC_MAX_THREAD_COUNT); // create executor with thread limit
 	}
@@ -50,6 +49,8 @@ public class MFC_NetCrawlerManager implements Runnable {
 	public MFC_NetCrawlerManager(BlockingQueue<Document> bqJSoupDoc) {
 		this();
 		this.bqMFSourceCode = bqJSoupDoc;
+//		siteLimit = (siteLimit == 0) ? MFC_MAX_SITE_VISITS : siteLimit;
+//		System.out.println("sitelimit: " + siteLimit);
 		this.siteLimit = MFC_MAX_SITE_VISITS;
 	}
 
@@ -93,6 +94,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 	@Override
 	public void run() {
 		System.out.println("running");
+
 		/*
 		 * The loop will continually create, check, and complete Callables known as Futures.
 		 * The futures will run as a thread in the executor and manage NetCrawler objects.
@@ -105,8 +107,6 @@ public class MFC_NetCrawlerManager implements Runnable {
 		 * Some initial understanding found from help found at:
 		 * http://www.journaldev.com/1090/java-callable-future-example
 		 */
-		System.out.println((sitesVisited < siteLimit));
-		System.out.println((!futuresArray.isEmpty() && !URLs.isEmpty()));
 		while ((sitesVisited < siteLimit)
 				|| (!futuresArray.isEmpty() && !URLs.isEmpty())) { // Constantly seek websites for processing
 			// Fills ArrayList to ensure the program always runs max threads allowable
@@ -114,7 +114,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 
 			// Iterate through Futures to remove any completed Callables in order to refill the thread pool and keep it full
 			manageFutures();
-
+						
 		}
 		executor.shutdown(); // close executor to release assets
 		try {
@@ -133,18 +133,11 @@ public class MFC_NetCrawlerManager implements Runnable {
 				.size(); futuresCount < MFC_MAX_THREAD_COUNT; futuresCount++) {
 			// Submit Callable tasks to be executed by thread pool and return Future to be analyzed for completion.
 			if (!URLs.isEmpty()) { // check that a URL is ready to execute
-				// Mock block for testing without the database
+
 				System.out.println("inside netmngr 3");
 
-				if (isMock) {
-					// Using the mock object, disregard the database connection for website URLs and run mock NetCrawlers
-					futuresArray.add(executor.submit(new MFC_NetCrawler(URLs.remove(0))));
-					futuresCount++;
-					System.out.println("mock ncmngr futures++: " + futuresCount);
-					break;
-				}
 				// Actual programming block
-				else {
+				if (!isMock) {
 					System.out.println("inside netmngr 4");
 					if (!database.isRecorded(DigestUtils.sha256Hex(URLs.get(0)))) {
 						System.out.println("inside netmngr 5 for " + URLs.get(0));
@@ -152,6 +145,15 @@ public class MFC_NetCrawlerManager implements Runnable {
 					}
 					else URLs.remove(0);
 				}
+				// Mock block for testing without the database
+				else {
+					// Using the mock object, disregard the database connection for website URLs and run mock NetCrawlers
+					futuresArray.add(executor.submit(new MFC_NetCrawler(URLs.remove(0))));
+					futuresCount++;
+					System.out.println("mock ncmngr futures++: " + futuresCount);
+					break;
+				}
+				
 			}
 			else break;
 		}
@@ -159,6 +161,7 @@ public class MFC_NetCrawlerManager implements Runnable {
 
 	private void manageFutures() {
 		for (int futureIndex = 0; futureIndex < futuresArray.size(); futureIndex++) { // FIFO
+			System.out.println("manage futures size: " + futuresArray.size() + " | " + futuresArray.get(futureIndex).toString() + " | bq: " + bqMFSourceCode.size());
 			try {
 				if (futuresArray.get(futureIndex).isDone() && bqMFSourceCode
 						.size() < MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT) {

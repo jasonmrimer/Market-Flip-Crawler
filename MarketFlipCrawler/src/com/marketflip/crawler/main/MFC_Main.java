@@ -57,7 +57,8 @@ public class MFC_Main {
 			bqMFSourceCode = new ArrayBlockingQueue<Document>(
 					MFC_SourceCodeAnalyzerManager.MFC_MAX_ANALYZER_QUEUE_COUNT);
 			// Create threads to run simultaneous sections of the application
-			dbcMngr = new MFC_DatabaseCrawlerManager(bqMFProduct, "testing", productLimit);
+//			dbcMngr = new MFC_DatabaseCrawlerManager(bqMFProduct, "testing", productLimit); // testing used when HB originally created Proton but changed to Production for DataAccessObject evolution
+			dbcMngr = new MFC_DatabaseCrawlerManager(bqMFProduct, "production", productLimit);
 			netMngr = new MFC_NetCrawlerManager(bqMFSourceCode, startURLPath, siteLimit);
 			scaMngr = new MFC_SourceCodeAnalyzerManager(bqMFSourceCode, bqMFProduct, docLimit);
 			dbcThread = new Thread(dbcMngr);
