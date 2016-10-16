@@ -19,6 +19,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/MarketFlipSharedAssets"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine (1)"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
